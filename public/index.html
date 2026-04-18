@@ -1,0 +1,802 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kernel Debugging & Rootkit Detection Simulation</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Courier New', monospace;
+            background: linear-gradient(135deg, #0a0e27 0%, #1a1a3e 100%);
+            color: #e0e0e0;
+            overflow-x: hidden;
+        }
+
+        /* Scanlines effect */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: repeating-linear-gradient(
+                0deg,
+                rgba(0, 255, 136, 0.03) 0px,
+                rgba(0, 255, 136, 0.03) 1px,
+                transparent 1px,
+                transparent 2px
+            );
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+            position: relative;
+            z-index: 2;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+            border-bottom: 3px solid #00ff88;
+            padding-bottom: 20px;
+            box-shadow: 0 0 20px rgba(0, 255, 136, 0.3);
+        }
+
+        h1 {
+            font-size: 2.5em;
+            color: #00ff88;
+            text-shadow: 0 0 10px #00ff88;
+            margin-bottom: 10px;
+            letter-spacing: 2px;
+        }
+
+        .subtitle {
+            color: #00ffff;
+            font-size: 1.1em;
+            margin-bottom: 20px;
+        }
+
+        .status-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(42, 47, 74, 0.8);
+            padding: 10px 20px;
+            border: 1px solid #dd00ff;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            font-size: 0.9em;
+        }
+
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .indicator-light {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            animation: pulse 1s infinite;
+        }
+
+        .indicator-light.good {
+            background: #00ff88;
+            box-shadow: 0 0 10px #00ff88;
+        }
+
+        .indicator-light.warning {
+            background: #ff6b35;
+            box-shadow: 0 0 10px #ff6b35;
+        }
+
+        .indicator-light.critical {
+            background: #ff1744;
+            box-shadow: 0 0 10px #ff1744;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .control-panel {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        button {
+            padding: 12px 20px;
+            background: linear-gradient(135deg, #00ff88 0%, #00ffff 100%);
+            color: #0a0e27;
+            border: 2px solid #00ff88;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            font-size: 1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 15px rgba(0, 255, 136, 0.3);
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0 25px rgba(0, 255, 136, 0.6);
+            background: linear-gradient(135deg, #00ffff 0%, #00ff88 100%);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .panel {
+            background: rgba(42, 47, 74, 0.7);
+            border: 2px solid;
+            border-radius: 4px;
+            padding: 20px;
+            backdrop-filter: blur(10px);
+        }
+
+        .panel-user {
+            border-color: #00ffff;
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.2);
+        }
+
+        .panel-kernel {
+            border-color: #ff1744;
+            box-shadow: 0 0 20px rgba(255, 23, 68, 0.2);
+        }
+
+        .panel h2 {
+            font-size: 1.4em;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid currentColor;
+        }
+
+        .panel-user h2 { color: #00ffff; }
+        .panel-kernel h2 { color: #ff1744; }
+
+        .process-list {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .process-item {
+            background: rgba(13, 27, 42, 0.6);
+            padding: 10px;
+            margin-bottom: 8px;
+            border-left: 4px solid #dd00ff;
+            border-radius: 2px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .process-item:hover {
+            transform: translateX(5px);
+            background: rgba(13, 27, 42, 0.9);
+            box-shadow: 0 0 10px rgba(221, 0, 255, 0.3);
+        }
+
+        .process-item.hidden {
+            border-left-color: #ff1744;
+            background: rgba(139, 0, 27, 0.3);
+        }
+
+        .process-name {
+            font-weight: bold;
+            color: #00ff88;
+            margin-bottom: 4px;
+        }
+
+        .process-info {
+            font-size: 0.85em;
+            color: #b0b0b0;
+        }
+
+        .hidden-badge {
+            display: inline-block;
+            background: #ff1744;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 3px;
+            font-size: 0.8em;
+            margin-left: 8px;
+            font-weight: bold;
+        }
+
+        .analysis-panel {
+            grid-column: 1 / -1;
+            border-color: #dd00ff;
+            box-shadow: 0 0 20px rgba(221, 0, 255, 0.2);
+        }
+
+        .analysis-panel h2 {
+            color: #dd00ff;
+        }
+
+        .indicator-box {
+            background: linear-gradient(135deg, rgba(255, 23, 68, 0.1) 0%, rgba(221, 0, 255, 0.1) 100%);
+            border-left: 4px solid #ff1744;
+            padding: 15px;
+            margin-bottom: 12px;
+            border-radius: 2px;
+        }
+
+        .indicator-box.warning {
+            border-left-color: #ff6b35;
+            background: linear-gradient(135deg, rgba(255, 107, 53, 0.1) 0%, rgba(221, 0, 255, 0.1) 100%);
+        }
+
+        .indicator-box.ok {
+            border-left-color: #00ff88;
+            background: linear-gradient(135deg, rgba(0, 255, 136, 0.1) 0%, rgba(0, 255, 136, 0.05) 100%);
+        }
+
+        .indicator-title {
+            font-weight: bold;
+            margin-bottom: 6px;
+            font-size: 1.05em;
+        }
+
+        .indicator-box.critical .indicator-title {
+            color: #ff1744;
+        }
+
+        .indicator-box.warning .indicator-title {
+            color: #ff6b35;
+        }
+
+        .indicator-box.ok .indicator-title {
+            color: #00ff88;
+        }
+
+        .indicator-content {
+            font-size: 0.9em;
+            line-height: 1.5;
+        }
+
+        .windbg-terminal {
+            background: #000000;
+            border: 2px solid #00ff88;
+            border-radius: 4px;
+            padding: 15px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            line-height: 1.6;
+            margin-bottom: 15px;
+            max-height: 300px;
+            overflow-y: auto;
+            box-shadow: 0 0 15px rgba(0, 255, 136, 0.2);
+        }
+
+        .terminal-line {
+            color: #00ff88;
+            margin-bottom: 4px;
+        }
+
+        .terminal-line.prompt {
+            color: #00ffff;
+            font-weight: bold;
+        }
+
+        .terminal-line.output {
+            color: #c0c0c0;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        .terminal-line.error {
+            color: #ff1744;
+            font-weight: bold;
+        }
+
+        .command-input {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        input[type="text"] {
+            flex: 1;
+            padding: 10px;
+            background: rgba(13, 27, 42, 0.8);
+            border: 1px solid #00ff88;
+            border-radius: 4px;
+            color: #00ff88;
+            font-family: 'Courier New', monospace;
+        }
+
+        input[type="text"]:focus {
+            outline: none;
+            box-shadow: 0 0 10px rgba(0, 255, 136, 0.5);
+            border-color: #00ffff;
+        }
+
+        .details-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .details-modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: linear-gradient(135deg, #0a0e27 0%, #1a1a3e 100%);
+            border: 3px solid #dd00ff;
+            border-radius: 8px;
+            padding: 30px;
+            max-width: 800px;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 0 40px rgba(221, 0, 255, 0.5);
+            position: relative;
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            background: none;
+            border: none;
+            color: #dd00ff;
+            font-size: 28px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .close-btn:hover {
+            color: #ff1744;
+            transform: scale(1.2);
+        }
+
+        .detail-item {
+            margin-bottom: 15px;
+            padding: 10px;
+            background: rgba(42, 47, 74, 0.5);
+            border-left: 3px solid #00ff88;
+            border-radius: 2px;
+        }
+
+        .detail-label {
+            color: #00ffff;
+            font-weight: bold;
+            margin-bottom: 4px;
+        }
+
+        .detail-value {
+            color: #c0c0c0;
+            font-family: monospace;
+            font-size: 0.9em;
+            word-break: break-all;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #00ff88;
+            border-top: 3px solid transparent;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .scroll-hint {
+            color: #b0b0b0;
+            font-size: 0.8em;
+            text-align: center;
+            margin-top: 10px;
+            font-style: italic;
+        }
+
+        @media (max-width: 1024px) {
+            .main-grid {
+                grid-template-columns: 1fr;
+            }
+
+            h1 {
+                font-size: 1.8em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>⚙️ KERNEL DEBUGGING SIMULATOR</h1>
+            <div class="subtitle">Cross-View Process Analysis & Rootkit Detection</div>
+        </header>
+
+        <div class="status-bar">
+            <div class="status-indicator">
+                <div class="indicator-light good"></div>
+                <span>Server Status: ONLINE</span>
+            </div>
+            <div class="status-indicator">
+                <span id="system-status">System Analysis: Ready</span>
+            </div>
+            <div class="status-indicator">
+                <span id="detection-count">Anomalies Detected: 0</span>
+            </div>
+        </div>
+
+        <div class="control-panel">
+            <button onclick="loadUserModeProcesses()">📊 Scan Processes (User-Mode)</button>
+            <button onclick="loadKernelModeProcesses()">🔍 Kernel Inspection (WinDbg)</button>
+            <button onclick="loadCrossViewAnalysis()">⚔️ Compare Views</button>
+            <button onclick="runRootkitDetection()">🚨 Rootkit Detection</button>
+        </div>
+
+        <div class="main-grid">
+            <!-- USER-MODE VIEW -->
+            <div class="panel panel-user">
+                <h2>👤 User-Mode View</h2>
+                <p style="color: #00ffff; font-size: 0.9em; margin-bottom: 10px;">
+                    What Task Manager sees (via CreateToolhelp32Snapshot)
+                </p>
+                <div class="process-list" id="user-mode-list">
+                    <div style="text-align: center; padding: 20px; color: #b0b0b0;">
+                        Click "Scan Processes (User-Mode)" to load
+                    </div>
+                </div>
+                <div class="scroll-hint">↑ Click a process for details ↑</div>
+            </div>
+
+            <!-- KERNEL-MODE VIEW -->
+            <div class="panel panel-kernel">
+                <h2>🔐 Kernel-Mode View</h2>
+                <p style="color: #ff1744; font-size: 0.9em; margin-bottom: 10px;">
+                    What WinDbg sees (complete truth - cannot be hooked)
+                </p>
+                <div class="process-list" id="kernel-mode-list">
+                    <div style="text-align: center; padding: 20px; color: #b0b0b0;">
+                        Click "Kernel Inspection (WinDbg)" to load
+                    </div>
+                </div>
+                <div class="scroll-hint">↑ Click a process for details ↑</div>
+            </div>
+        </div>
+
+        <!-- CROSS-VIEW ANALYSIS -->
+        <div class="panel analysis-panel">
+            <h2>⚖️ CROSS-VIEW ANALYSIS</h2>
+            <div id="analysis-content" style="text-align: center; padding: 20px; color: #b0b0b0;">
+                Click "Compare Views" to analyze discrepancies
+            </div>
+        </div>
+
+        <!-- WINDBG TERMINAL EMULATOR -->
+        <div class="panel analysis-panel" style="margin-top: 20px;">
+            <h2>💻 WinDbg Command Emulator</h2>
+            <div class="command-input">
+                <input type="text" id="windbg-input" placeholder="Enter command: !peb, !process 0 0, lm" />
+                <button onclick="executeWinDbgCommand()">Execute</button>
+            </div>
+            <div class="windbg-terminal" id="windbg-output">
+                <div class="terminal-line prompt">kd> </div>
+                <div class="terminal-line output">Ready for commands. Try: !peb, !process 0 0, or lm</div>
+            </div>
+        </div>
+
+        <!-- ROOTKIT DETECTION RESULTS -->
+        <div class="panel analysis-panel" style="margin-top: 20px;">
+            <h2>🚨 ROOTKIT DETECTION ENGINE</h2>
+            <div id="detection-content" style="text-align: center; padding: 20px; color: #b0b0b0;">
+                Click "Rootkit Detection" to run comprehensive analysis
+            </div>
+        </div>
+    </div>
+
+    <!-- DETAILS MODAL -->
+    <div class="details-modal" id="detailsModal">
+        <div class="modal-content">
+            <button class="close-btn" onclick="closeDetailsModal()">&times;</button>
+            <div id="modal-details"></div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:3001/api';
+        let currentUserProcs = {};
+        let currentKernelProcs = {};
+
+        async function loadUserModeProcesses() {
+            document.getElementById('user-mode-list').innerHTML = '<div class="loading" style="margin: auto;"></div>';
+            
+            try {
+                const response = await fetch(`${API_URL}/processes/user-mode`);
+                const data = await response.json();
+                currentUserProcs = data.data;
+                
+                let html = '';
+                Object.entries(data.data).forEach(([name, proc]) => {
+                    const modCount = proc.modules.length;
+                    html += `
+                        <div class="process-item" onclick="showProcessDetails('${name}', 'user')">
+                            <div class="process-name">${name}</div>
+                            <div class="process-info">PID: ${proc.pid} | Threads: ${proc.threadCount} | Modules: ${modCount}</div>
+                        </div>
+                    `;
+                });
+                document.getElementById('user-mode-list').innerHTML = html || '<div style="text-align: center; color: #ff1744;">No processes found</div>';
+            } catch (error) {
+                document.getElementById('user-mode-list').innerHTML = `<div style="color: #ff1744;">Error: ${error.message}</div>`;
+            }
+        }
+
+        async function loadKernelModeProcesses() {
+            document.getElementById('kernel-mode-list').innerHTML = '<div class="loading" style="margin: auto;"></div>';
+            
+            try {
+                const response = await fetch(`${API_URL}/processes/kernel-mode`);
+                const data = await response.json();
+                currentKernelProcs = data.data;
+                
+                let html = '';
+                Object.entries(data.data).forEach(([name, proc]) => {
+                    const isHidden = proc.hidden === 'YES - ROOTKIT DETECTED';
+                    const modCount = proc.modules.length;
+                    html += `
+                        <div class="process-item ${isHidden ? 'hidden' : ''}" onclick="showProcessDetails('${name}', 'kernel')">
+                            <div class="process-name">
+                                ${name}
+                                ${isHidden ? '<span class="hidden-badge">ROOTKIT</span>' : ''}
+                            </div>
+                            <div class="process-info">PID: ${proc.pid} | Threads: ${proc.threadCount} | Modules: ${modCount} | Addr: ${proc.kernelAddr}</div>
+                        </div>
+                    `;
+                });
+                document.getElementById('kernel-mode-list').innerHTML = html || '<div style="text-align: center; color: #ff1744;">No processes found</div>';
+            } catch (error) {
+                document.getElementById('kernel-mode-list').innerHTML = `<div style="color: #ff1744;">Error: ${error.message}</div>`;
+            }
+        }
+
+        async function loadCrossViewAnalysis() {
+            document.getElementById('analysis-content').innerHTML = '<div class="loading" style="margin: auto;"></div>';
+            
+            try {
+                const response = await fetch(`${API_URL}/analysis/cross-view-comparison`);
+                const data = await response.json();
+                
+                let html = `
+                    <div class="indicator-box critical">
+                        <div class="indicator-title">🔴 Hidden Processes: ${data.hiddenProcesses.count}</div>
+                        <div class="indicator-content">
+                            Risk Level: <strong>${data.hiddenProcesses.risk}</strong><br>
+                            ${data.hiddenProcesses.list.length > 0 ? 'Found: ' + data.hiddenProcesses.list.join(', ') : 'None detected'}
+                        </div>
+                    </div>
+                `;
+
+                if (data.hookedSystemDlls.count > 0) {
+                    html += `
+                        <div class="indicator-box warning">
+                            <div class="indicator-title">🟠 Hooked System DLLs: ${data.hookedSystemDlls.count}</div>
+                            <div class="indicator-content">
+                                Risk Level: <strong>${data.hookedSystemDlls.risk}</strong><br>
+                                ${data.hookedSystemDlls.affected.map(a => `${a.process}: ${a.modules.join(', ')}`).join('<br>')}
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    html += `
+                        <div class="indicator-box ok">
+                            <div class="indicator-title">✅ No Hooked System DLLs</div>
+                            <div class="indicator-content">All system DLLs appear clean</div>
+                        </div>
+                    `;
+                }
+
+                html += `<div style="margin-top: 15px; color: #c0c0c0; font-size: 0.9em;">
+                    <strong>IOCs (Indicators of Compromise):</strong><br>
+                    ${data.indicatorsOfCompromise.map(i => '• ' + i).join('<br>')}
+                </div>`;
+
+                document.getElementById('analysis-content').innerHTML = html;
+                updateSystemStatus(data.hiddenProcesses.count > 0 ? 'COMPROMISED' : 'CLEAN');
+            } catch (error) {
+                document.getElementById('analysis-content').innerHTML = `<div style="color: #ff1744;">Error: ${error.message}</div>`;
+            }
+        }
+
+        async function runRootkitDetection() {
+            document.getElementById('detection-content').innerHTML = '<div class="loading" style="margin: auto;"></div>';
+            
+            try {
+                const response = await fetch(`${API_URL}/analysis/rootkit-detection`);
+                const data = await response.json();
+                
+                let html = `
+                    <div class="indicator-box ${data.systemStatus === 'COMPROMISED' ? 'critical' : 'ok'}">
+                        <div class="indicator-title">System Status: ${data.systemStatus}</div>
+                        <div class="indicator-content">
+                            Total Indicators Found: <strong>${data.totalIndicators}</strong>
+                        </div>
+                    </div>
+                `;
+
+                data.indicators.forEach(ind => {
+                    const boxClass = ind.severity === 'CRITICAL' ? 'critical' : ind.severity === 'HIGH' ? 'warning' : 'ok';
+                    html += `
+                        <div class="indicator-box ${boxClass}">
+                            <div class="indicator-title">[${ind.severity}] ${ind.type}</div>
+                            <div class="indicator-content">
+                                ${ind.description}<br>
+                                ${ind.processes ? 'Processes: ' + ind.processes.join(', ') + '<br>' : ''}
+                                ${ind.modules ? 'Modules: ' + ind.modules.join(', ') + '<br>' : ''}
+                                Detection: <em>${ind.detection}</em>
+                            </div>
+                        </div>
+                    `;
+                });
+
+                html += `<div style="margin-top: 15px; padding: 10px; background: rgba(255, 107, 53, 0.1); border-radius: 4px;">
+                    <strong style="color: #ff6b35;">Recommendations:</strong><br>
+                    ${data.recommendations.map(r => '▸ ' + r).join('<br>')}
+                </div>`;
+
+                document.getElementById('detection-content').innerHTML = html;
+                document.getElementById('detection-count').textContent = `Anomalies Detected: ${data.totalIndicators}`;
+            } catch (error) {
+                document.getElementById('detection-content').innerHTML = `<div style="color: #ff1744;">Error: ${error.message}</div>`;
+            }
+        }
+
+        async function executeWinDbgCommand() {
+            const input = document.getElementById('windbg-input').value.trim();
+            if (!input) return;
+
+            const terminal = document.getElementById('windbg-output');
+            terminal.innerHTML += `<div class="terminal-line prompt">kd> ${input}</div>`;
+            terminal.innerHTML += `<div class="terminal-line"><div class="loading" style="display: inline-block;"></div></div>`;
+            terminal.scrollTop = terminal.scrollHeight;
+
+            try {
+                const response = await fetch(`${API_URL}/windbg-command`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ command: input })
+                });
+                const data = await response.json();
+
+                if (data.error) {
+                    terminal.innerHTML += `<div class="terminal-line error">ERROR: ${data.error}</div>`;
+                    terminal.innerHTML += `<div class="terminal-line output">Available: ${data.available.join(', ')}</div>`;
+                } else {
+                    terminal.innerHTML += `<div class="terminal-line output">${data.output}</div>`;
+                    terminal.innerHTML += `<div class="terminal-line output" style="color: #00ff88; margin-top: 10px;">💡 ${data.education}</div>`;
+                }
+            } catch (error) {
+                terminal.innerHTML += `<div class="terminal-line error">ERROR: ${error.message}</div>`;
+            }
+
+            document.getElementById('windbg-input').value = '';
+            terminal.scrollTop = terminal.scrollHeight;
+        }
+
+        async function showProcessDetails(procName, mode) {
+            const procs = mode === 'user' ? currentUserProcs : currentKernelProcs;
+            const proc = procs[procName];
+            if (!proc) return;
+
+            try {
+                const response = await fetch(`${API_URL}/process/${procName}/details`);
+                const data = await response.json();
+
+                let html = `<h2 style="color: ${mode === 'user' ? '#00ffff' : '#ff1744'};">${procName} (${mode.toUpperCase()} Mode)</h2>`;
+                html += `
+                    <div class="detail-item">
+                        <div class="detail-label">Process ID (PID)</div>
+                        <div class="detail-value">${data.pid}</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Privilege Ring</div>
+                        <div class="detail-value">${data.ring0}</div>
+                    </div>
+                    ${mode === 'kernel' ? `
+                        <div class="detail-item">
+                            <div class="detail-label">Kernel Address</div>
+                            <div class="detail-value">${data.kernelAddress}</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Hidden (Rootkit)</div>
+                            <div class="detail-value">${data.flags.isHidden ? '⚠️ YES - ROOTKIT DETECTED' : 'No'}</div>
+                        </div>
+                    ` : ''}
+                    <div class="detail-item">
+                        <div class="detail-label">Thread Count</div>
+                        <div class="detail-value">${data.threadCount}</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Open Handles</div>
+                        <div class="detail-value">${data.handleCount}</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Loaded Modules (${data.modules.length})</div>
+                        <div class="detail-value">
+                            ${data.modules.map(m => {
+                                if (mode === 'kernel') {
+                                    return `<div>→ ${m.name} @ ${m.kernelBase} [${m.userVisible === 'yes' ? '✓ User Visible' : '⚠️ HIDDEN'}]</div>`;
+                                } else {
+                                    return `<div>→ ${m.name} @ ${m.base}</div>`;
+                                }
+                            }).join('')}
+                        </div>
+                    </div>
+                `;
+
+                document.getElementById('modal-details').innerHTML = html;
+                document.getElementById('detailsModal').classList.add('active');
+            } catch (error) {
+                alert('Error loading details: ' + error.message);
+            }
+        }
+
+        function closeDetailsModal() {
+            document.getElementById('detailsModal').classList.remove('active');
+        }
+
+        function updateSystemStatus(status) {
+            const indicator = document.querySelector('#system-status');
+            if (status === 'COMPROMISED') {
+                indicator.style.color = '#ff1744';
+                indicator.textContent = '🚨 System Analysis: COMPROMISED';
+            } else {
+                indicator.style.color = '#00ff88';
+                indicator.textContent = '✓ System Analysis: CLEAN';
+            }
+        }
+
+        // Allow Enter key in WinDbg input
+        document.getElementById('windbg-input')?.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') executeWinDbgCommand();
+        });
+
+        // Close modal on Escape
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') closeDetailsModal();
+        });
+    </script>
+</body>
+</html>

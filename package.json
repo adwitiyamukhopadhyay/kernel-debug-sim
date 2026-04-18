@@ -1,0 +1,21 @@
+{
+  "name": "kernel-debug-sim",
+  "version": "1.0.0",
+  "description": "Kernel Debugging & Rootkit Detection Educational Simulation",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "keywords": ["malware", "analysis", "rootkit", "kernel", "debugging", "education"],
+  "author": "Dr. Adwitiya Mukhopadhyay",
+  "license": "Educational",
+  "dependencies": {
+    "express": "^4.18.2",
+    "cors": "^2.8.5"
+  },
+  "engines": {
+    "node": ">=14.0.0",
+    "npm": ">=6.0.0"
+  }
+}
