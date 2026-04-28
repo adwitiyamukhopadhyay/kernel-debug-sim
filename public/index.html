@@ -559,6 +559,85 @@
             font-style: italic;
         }
 
+        /* Network Packet Sniffer Styles */
+        .packet-feed {
+            max-height: 400px;
+            overflow-y: auto;
+            background: #050814;
+            border: 2px solid #00ff88;
+            border-radius: 4px;
+            padding: 10px;
+            font-family: 'Courier New', monospace;
+        }
+        .packet-row {
+            padding: 6px 10px;
+            margin-bottom: 4px;
+            border-radius: 2px;
+            background: rgba(0, 255, 136, 0.05);
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            font-size: 0.85em;
+            animation: slideInUp 0.3s ease-out forwards;
+        }
+        @keyframes slideInUp {
+            from { margin-top: 15px; opacity: 0; }
+            to { margin-top: 0; opacity: 1; }
+        }
+        .packet-row:hover {
+            background: rgba(0, 255, 136, 0.15);
+            transform: translateX(5px);
+        }
+        .packet-row.suspicious {
+            background: rgba(255, 50, 50, 0.15);
+            border-left: 3px solid #ff3333;
+        }
+        .packet-row.suspicious:hover {
+            background: rgba(255, 50, 50, 0.25);
+        }
+        .badge {
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 0.8em;
+            font-weight: bold;
+            color: #000;
+            min-width: 50px;
+            text-align: center;
+        }
+        .badge-tcp { background: #00ffff; }
+        .badge-udp { background: #ffff00; }
+        .badge-icmp { background: #ff9900; }
+        .badge-arp { background: #ff00ff; }
+        .badge-http { background: #ff3333; color: white; }
+        .badge-https { background: #00ff88; }
+        .hex-dump-container {
+            display: flex;
+            gap: 20px;
+            background: #000;
+            padding: 15px;
+            border: 1px solid #00ff88;
+            margin-top: 10px;
+            font-size: 0.85em;
+        }
+        .hex-column { color: #00ff88; }
+        .ascii-column { color: #00ffff; }
+        .beginner-tip {
+            background: rgba(0, 255, 255, 0.1);
+            border-left: 4px solid #00ffff;
+            padding: 10px 15px;
+            margin: 15px 0;
+        }
+        .ascii-bar-row { display: flex; align-items: center; margin-bottom: 5px; }
+        .ascii-bar-label { width: 80px; color: #00ffff; }
+        .ascii-bar-track { flex-grow: 1; height: 12px; background: rgba(13, 27, 42, 0.8); border-left: 1px solid #00ff88; }
+        .ascii-bar-fill { height: 100%; background: #00ff88; }
+        .learning-callout {
+            border: 2px dashed #dd00ff; padding: 15px; margin-top: 20px;
+            background: rgba(221, 0, 255, 0.05); border-radius: 4px;
+        }
+
         @media (max-width: 1024px) {
             .main-grid {
                 grid-template-columns: 1fr;
@@ -587,6 +666,7 @@
                 <button class="nav-button" data-target="panel-detection" onclick="runRootkitDetection()">Detection</button>
                 <button class="nav-button" data-target="panel-windbg" onclick="showWindbgTerminal()">WinDbg</button>
                 <button class="nav-button" data-target="obfuscation-panel" onclick="loadObfuscatedConfig()">Config Lab</button>
+                <button class="nav-button" data-target="panel-network" onclick="showNetworkPanel()">Network Sniffer</button>
             </nav>
         </header>
 
@@ -725,6 +805,43 @@
                 Click "Extract Rootkit Config" to retrieve obfuscated data from the kernel driver memory space.
             </div>
         </div>
+        
+        <!-- NETWORK PACKET SNIFFER -->
+        <div class="panel analysis-panel" id="panel-network" style="display: none;">
+            <h2>🌐 Network Packet Sniffer</h2>
+            
+            <div class="command-input" style="margin-bottom: 20px; align-items: center; background: rgba(13, 27, 42, 0.6); padding: 15px; border: 1px solid #00ffff; border-radius: 4px;">
+                <button onclick="startCapture()" id="btn-start-cap" style="padding: 8px 15px; font-size: 0.9em;">▶ Start Capture</button>
+                <button onclick="stopCapture()" id="btn-stop-cap" style="padding: 8px 15px; font-size: 0.9em; background: transparent; color: #ff1744; border-color: #ff1744;" disabled>⏹ Stop</button>
+                
+                <select id="filter-protocol" onchange="applyNetworkFilter()" style="padding: 8px; background: #0a0e27; color: #00ffff; border: 1px solid #00ffff; margin-left: auto;">
+                    <option value="ALL">All Protocols</option>
+                    <option value="TCP">TCP</option>
+                    <option value="UDP">UDP</option>
+                    <option value="ICMP">ICMP</option>
+                    <option value="ARP">ARP</option>
+                    <option value="HTTP">HTTP</option>
+                    <option value="HTTPS">HTTPS</option>
+                </select>
+                
+                <label style="display: flex; align-items: center; gap: 5px; color: #ff1744; font-weight: bold; cursor: pointer; margin-left: 15px;">
+                    <input type="checkbox" id="filter-suspicious" onchange="applyNetworkFilter()">
+                    🚨 Suspicious Only
+                </label>
+
+                <button onclick="analyzeNetworkTraffic()" style="padding: 8px 15px; font-size: 0.9em; border-color: #dd00ff; color: #dd00ff; background: transparent; margin-left: 15px;">📊 Analyze Traffic</button>
+            </div>
+
+            <div class="packet-feed" id="packet-feed">
+                <div style="text-align: center; padding: 20px; color: #b0b0b0;">Click "Start Capture" to begin live sniffing.</div>
+            </div>
+
+            <div id="network-analysis-content" style="display: none; margin-top: 20px; padding: 20px; background: rgba(42, 47, 74, 0.7); border: 2px solid #dd00ff; border-radius: 4px;"></div>
+
+            <div class="learning-callout">
+                <strong style="color: #dd00ff;">🎯 Challenge:</strong> Find the packet containing cleartext credentials. Why is this dangerous? What protocol should be used instead?
+            </div>
+        </div>
     </div>
 
     <!-- DETAILS MODAL -->
@@ -748,6 +865,7 @@
             document.getElementById('panel-windbg').style.display = 'none';
             document.getElementById('panel-detection').style.display = 'none';
             document.getElementById('obfuscation-panel').style.display = 'none';
+            if(document.getElementById('panel-network')) document.getElementById('panel-network').style.display = 'none';
 
             document.querySelectorAll('.nav-button').forEach(button => {
                 button.classList.toggle('active', button.dataset.target === panelId);
@@ -1119,6 +1237,170 @@
                 indicator.style.color = '#00ff88';
                 indicator.textContent = '✓ System Analysis: CLEAN';
             }
+        }
+
+        // ==================== NETWORK PACKET SNIFFER LOGIC ====================
+        
+        let captureInterval = null;
+        let networkHover = false;
+        let packetPool = [];
+        let filteredPool = [];
+        let packetIndex = 0;
+
+        async function fetchPackets() {
+            try {
+                const response = await fetch(`${API_URL}/network/packet-stream`);
+                packetPool = await response.json();
+                applyNetworkFilter();
+            } catch (err) {
+                console.error('Error fetching network packets:', err);
+            }
+        }
+
+        function showNetworkPanel() {
+            showPanel('panel-network');
+            if (packetPool.length === 0) fetchPackets();
+            
+            const feed = document.getElementById('packet-feed');
+            feed.addEventListener('mouseenter', () => networkHover = true);
+            feed.addEventListener('mouseleave', () => networkHover = false);
+        }
+
+        async function applyNetworkFilter() {
+            const proto = document.getElementById('filter-protocol').value;
+            const susp = document.getElementById('filter-suspicious').checked;
+            
+            try {
+                const response = await fetch(`${API_URL}/network/filter?protocol=${proto}&suspicious_only=${susp}`);
+                filteredPool = await response.json();
+                document.getElementById('packet-feed').innerHTML = ''; // Reset Visual Feed
+                packetIndex = 0;
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        function startCapture() {
+            if (captureInterval) return;
+            document.getElementById('btn-start-cap').disabled = true;
+            document.getElementById('btn-stop-cap').disabled = false;
+            document.getElementById('btn-stop-cap').style.background = 'rgba(255, 23, 68, 0.2)';
+            
+            const feed = document.getElementById('packet-feed');
+            if (feed.innerHTML.includes('begin live sniffing')) feed.innerHTML = '';
+
+            captureInterval = setInterval(() => {
+                if (networkHover || filteredPool.length === 0) return;
+                
+                const pkt = filteredPool[packetIndex % filteredPool.length];
+                packetIndex++;
+                renderPacket(pkt);
+            }, 800);
+        }
+
+        function stopCapture() {
+            clearInterval(captureInterval);
+            captureInterval = null;
+            document.getElementById('btn-start-cap').disabled = false;
+            document.getElementById('btn-stop-cap').disabled = true;
+            document.getElementById('btn-stop-cap').style.background = 'transparent';
+        }
+
+        function renderPacket(pkt) {
+            const feed = document.getElementById('packet-feed');
+            const row = document.createElement('div');
+            row.className = `packet-row ${pkt.is_suspicious ? 'suspicious' : ''}`;
+            row.onclick = () => showPacketDetailsModal(pkt.id);
+            
+            let pColor = pkt.protocol.toLowerCase();
+            const badge = `<span class="badge badge-${pColor}">${pkt.protocol}</span>`;
+            const warning = pkt.is_suspicious ? '<span style="color: #ff1744; margin-right:5px;">⚠</span>' : '';
+            
+            row.innerHTML = `
+                <span style="color: #b0b0b0;">[${pkt.timestamp}]</span>
+                ${badge}
+                <span style="flex-grow: 1; margin-left: 10px; color: #c0c0c0;">${warning}${pkt.src_ip}:${pkt.src_port} → ${pkt.dst_ip}:${pkt.dst_port}</span>
+                <span style="color: #00ffff;">Size: ${pkt.size_bytes}</span>
+                <span style="color: #00ff88; width: 80px; text-align: right;">${pkt.flags}</span>
+            `;
+            
+            feed.appendChild(row);
+            if (feed.children.length > 50) feed.removeChild(feed.firstChild);
+            feed.scrollTop = feed.scrollHeight;
+        }
+
+        async function showPacketDetailsModal(id) {
+            try {
+                const response = await fetch(`${API_URL}/network/packet/${id}`);
+                const data = await response.json();
+                
+                const tColor = data.threat_level === 'CRITICAL' ? '#ff1744' : data.threat_level === 'HIGH' ? '#ff6b35' : data.threat_level === 'MEDIUM' ? '#ffcc00' : '#00ff88';
+                const cleanAscii = data.ascii_representation.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
+                let html = `
+                    <h2 style="color: #00ffff; border-bottom: 1px solid #00ffff; padding-bottom: 10px;">Packet Inspection: ${data.id}</h2>
+                    <div style="margin: 15px 0;">
+                        <span style="background: ${tColor}; color: #000; padding: 4px 10px; border-radius: 4px; font-weight: bold;">
+                            THREAT LEVEL: ${data.threat_level}
+                        </span>
+                        ${data.is_suspicious ? `<strong style="color: #ff1744; margin-left: 15px;">Detection: ${data.suspicion_reason}</strong>` : ''}
+                    </div>
+                    <div class="main-grid" style="gap: 15px; margin-bottom: 15px;">
+                        <div class="detail-item" style="margin-bottom: 0;">
+                            <div class="detail-label">Connection Details</div>
+                            <div class="detail-value">
+                                Source: ${data.src_ip}:${data.src_port}<br>Dest: ${data.dst_ip}:${data.dst_port}<br>Protocol: ${data.protocol}<br>Time: ${data.timestamp}
+                            </div>
+                        </div>
+                        <div class="detail-item" style="margin-bottom: 0;">
+                            <div class="detail-label">Transport Information</div>
+                            <div class="detail-value">
+                                Size: ${data.size_bytes} bytes<br>TTL: ${data.ttl}<br>${data.tcp_flags_decoded}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="beginner-tip">
+                        <strong>Beginner Tip 💡</strong><br>${data.protocol_explanation}
+                    </div>
+                    <h3 style="color: #00ff88; margin-top: 20px;">Hex Dump / Payload Analysis</h3>
+                    <div class="hex-dump-container">
+                        <div class="hex-column" style="white-space: pre;">${data.hex_dump}</div>
+                        <div class="ascii-column" style="white-space: pre;">${cleanAscii}</div>
+                    </div>
+                `;
+                document.getElementById('modal-details').innerHTML = html;
+                document.getElementById('detailsModal').classList.add('active');
+            } catch (err) { console.error(err); }
+        }
+
+        async function analyzeNetworkTraffic() {
+            try {
+                const response = await fetch(`${API_URL}/network/analysis`);
+                const data = await response.json();
+                const content = document.getElementById('network-analysis-content');
+                content.style.display = 'block';
+
+                let chartHtml = '<h3 style="color: #00ffff; margin-bottom: 15px;">Protocol Breakdown</h3>';
+                for (const [proto, count] of Object.entries(data.protocols_breakdown)) {
+                    const percentage = Math.round((count / data.total_packets) * 100);
+                    chartHtml += `<div class="ascii-bar-row"><div class="ascii-bar-label">${proto} (${count})</div><div class="ascii-bar-track"><div class="ascii-bar-fill" style="width: ${percentage}%"></div></div></div>`;
+                }
+
+                let talkersHtml = '<h3 style="color: #dd00ff; margin: 20px 0 15px;">Top Talkers (Source IPs)</h3>';
+                data.top_talkers.forEach((t, i) => { talkersHtml += `<div style="color: #c0c0c0; margin-bottom: 5px;">${i+1}. <strong>${t.ip}</strong> (${t.count} packets)</div>`; });
+
+                let attacksHtml = '<h3 style="color: #ff1744; margin: 0 0 15px;">Detected Attacks</h3>';
+                if (data.detected_attacks.length > 0) {
+                    data.detected_attacks.forEach(a => {
+                        attacksHtml += `<div style="background: rgba(255, 23, 68, 0.1); border-left: 3px solid #ff1744; padding: 10px; margin-bottom: 10px;"><strong style="color: #ff1744;">${a.attack_type} [${a.severity}]</strong><br><span style="font-size: 0.9em; color: #b0b0b0;">Packets involved: ${a.packets_involved}</span><br><em style="color: #00ff88; font-size: 0.9em;">Remediation: ${a.recommendation}</em></div>`;
+                    });
+                } else {
+                    attacksHtml += '<div style="color: #00ff88;">No attacks detected in current buffer.</div>';
+                }
+
+                content.innerHTML = `<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;"><div>${chartHtml}${talkersHtml}</div><div>${attacksHtml}</div></div>`;
+                content.scrollIntoView({ behavior: 'smooth' });
+            } catch (err) { console.error(err); }
         }
 
         // Allow Enter key in WinDbg input

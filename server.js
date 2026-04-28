@@ -69,6 +69,56 @@ const kernelProcessData = {
   }
 };
 
+// ==================== SIMULATED NETWORK DATA ====================
+
+const networkPackets = [];
+
+// 1. HTTP POST cleartext (1 packet)
+networkPackets.push({
+  id: 'pkt_1', timestamp: '10:01:23.412', protocol: 'HTTP',
+  src_ip: '192.168.1.105', dst_ip: '198.51.100.45', src_port: 54321, dst_port: 80,
+  size_bytes: 412, ttl: 64, flags: 'PSH, ACK',
+  payload_preview: 'POST /login HTTP/1.1\r\nHost: example.com\r\n\r\nusername=admin&password=password123',
+  is_suspicious: true, suspicion_reason: 'Cleartext credentials detected'
+});
+
+// 2. TCP SYN port scan (5 packets)
+for(let i=1; i<=5; i++) {
+  networkPackets.push({
+    id: `pkt_${1+i}`, timestamp: `10:01:23.${420+i}`, protocol: 'TCP',
+    src_ip: '10.0.0.55', dst_ip: '192.168.1.10', src_port: 44444+i, dst_port: 20+i,
+    size_bytes: 60, ttl: 128, flags: 'SYN',
+    payload_preview: '',
+    is_suspicious: true, suspicion_reason: 'Port scan detected'
+  });
+}
+
+// 3. ARP Spoofing (3 packets)
+for(let i=1; i<=3; i++) {
+  networkPackets.push({
+    id: `pkt_${6+i}`, timestamp: `10:01:24.${100+i}`, protocol: 'ARP',
+    src_ip: '192.168.1.99', dst_ip: '255.255.255.255', src_port: '-', dst_port: '-',
+    size_bytes: 42, ttl: 1, flags: '',
+    payload_preview: 'ARP Reply 192.168.1.1 is-at 00:0c:29:11:22:33',
+    is_suspicious: true, suspicion_reason: 'ARP spoofing attempt'
+  });
+}
+
+// 4. Normal traffic (21 packets)
+for(let i=1; i<=21; i++) {
+  const isDNS = i % 3 === 0;
+  const isICMP = i % 7 === 0;
+  let proto = isICMP ? 'ICMP' : (isDNS ? 'UDP' : 'HTTPS');
+  networkPackets.push({
+    id: `pkt_${9+i}`, timestamp: `10:01:${25+i}.${200+i}`, protocol: proto,
+    src_ip: `192.168.1.${100 + (i%5)}`, dst_ip: isDNS ? '8.8.8.8' : (isICMP ? '1.1.1.1' : '104.18.2.1'),
+    src_port: isICMP ? '-' : 50000+i, dst_port: isICMP ? '-' : (isDNS ? 53 : 443),
+    size_bytes: isICMP ? 74 : (isDNS ? 85 : 1240), ttl: 64, flags: isDNS || isICMP ? '' : 'ACK',
+    payload_preview: isICMP ? 'Echo Request id=0x1234 seq=1' : (isDNS ? 'Standard query A www.google.com' : 'Encrypted Application Data...'),
+    is_suspicious: false, suspicion_reason: null
+  });
+}
+
 // ==================== API ENDPOINTS ====================
 
 // Helper function to simulate malware data obfuscation (XOR + Base64)
@@ -338,6 +388,116 @@ app.get('/api/analysis/rootkit-detection', (req, res) => {
       'Isolate system from network immediately if Critical',
       'Compare with clean baseline'
     ]
+  });
+});
+
+// ==================== NETWORK PACKET SIMULATION API ====================
+
+// Helper function to format hex dump up to 64 bytes
+const getHexDump = (str) => {
+  const buf = Buffer.from(str || '0000000000000000');
+  let hex = '';
+  let ascii = '';
+  for (let i = 0; i < Math.min(buf.length, 64); i += 16) {
+    let hexRow = [];
+    let asciiRow = [];
+    for (let j = 0; j < 16; j++) {
+      if (i + j < buf.length) {
+        const b = buf[i + j];
+        hexRow.push(b.toString(16).padStart(2, '0'));
+        asciiRow.push(b >= 32 && b <= 126 ? String.fromCharCode(b) : '.');
+      } else {
+        hexRow.push('  ');
+        asciiRow.push(' ');
+      }
+    }
+    hexRow.splice(8, 0, ' '); // Insert middle gap for classical hex dump aesthetic
+    hex += hexRow.join(' ') + '\n';
+    ascii += asciiRow.join('') + '\n';
+  }
+  return { hex: hex.trimEnd(), ascii: ascii.trimEnd() };
+};
+
+// Get full packet stream
+app.get('/api/network/packet-stream', (req, res) => {
+  res.json(networkPackets);
+});
+
+// Get specific packet details
+app.get('/api/network/packet/:id', (req, res) => {
+  const packet = networkPackets.find(p => p.id === req.params.id);
+  if (!packet) return res.status(404).json({ error: 'Packet not found' });
+  
+  const { hex, ascii } = getHexDump(packet.payload_preview);
+  let explanation = '';
+  switch(packet.protocol) {
+    case 'TCP': explanation = 'Transmission Control Protocol ensures reliable, ordered delivery of data. Notice the flags (SYN, ACK) used to establish and manage connections.'; break;
+    case 'UDP': explanation = 'User Datagram Protocol sends messages with minimal overhead. It is fast but does not guarantee delivery or exact order.'; break;
+    case 'HTTP': explanation = 'Hypertext Transfer Protocol transmits data in cleartext. Anyone intercepting the packet on the network can easily read its contents, including sensitive data like passwords.'; break;
+    case 'HTTPS': explanation = 'HTTP Secure uses TLS to encrypt data in transit. The payload is unreadable to interceptors without the decryption key.'; break;
+    case 'ARP': explanation = 'Address Resolution Protocol maps IP addresses to MAC addresses on a local subnet. Attackers can flood ARP replies to intercept network traffic (ARP Spoofing).'; break;
+    case 'ICMP': explanation = 'Internet Control Message Protocol is used for network diagnostics (e.g., ping). Attackers often use it to sweep a network and discover live hosts.'; break;
+    default: explanation = 'Standard network communications protocol.';
+  }
+
+  let threat_level = 'LOW';
+  if (packet.is_suspicious) {
+    if (packet.suspicion_reason.includes('Cleartext')) threat_level = 'CRITICAL';
+    else if (packet.suspicion_reason.includes('ARP')) threat_level = 'HIGH';
+    else threat_level = 'MEDIUM';
+  }
+
+  res.json({
+    ...packet,
+    tcp_flags_decoded: ['TCP', 'HTTP', 'HTTPS'].includes(packet.protocol) ? `TCP Flags: [${packet.flags}]` : 'N/A',
+    hex_dump: hex,
+    ascii_representation: ascii,
+    protocol_explanation: explanation,
+    threat_level
+  });
+});
+
+// Filter packet stream
+app.get('/api/network/filter', (req, res) => {
+  let filtered = networkPackets;
+  const { protocol, suspicious_only } = req.query;
+  
+  if (protocol && protocol !== 'ALL') {
+    filtered = filtered.filter(p => p.protocol === protocol);
+  }
+  if (suspicious_only === 'true') {
+    filtered = filtered.filter(p => p.is_suspicious);
+  }
+  res.json(filtered);
+});
+
+// Network Traffic Analysis
+app.get('/api/network/analysis', (req, res) => {
+  const protocols_breakdown = {};
+  const ip_counts = {};
+  
+  networkPackets.forEach(p => {
+    protocols_breakdown[p.protocol] = (protocols_breakdown[p.protocol] || 0) + 1;
+    if(p.src_ip !== '-') ip_counts[p.src_ip] = (ip_counts[p.src_ip] || 0) + 1;
+  });
+
+  const top_talkers = Object.entries(ip_counts)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 3)
+    .map(entry => ({ ip: entry[0], count: entry[1] }));
+
+  const detected_attacks = [
+    { attack_type: 'Cleartext Credentials', severity: 'CRITICAL', packets_involved: 1, recommendation: 'Enforce HTTPS (TLS) for all authentication endpoints. Deprecate HTTP.' },
+    { attack_type: 'Port Scan (SYN)', severity: 'MEDIUM', packets_involved: 5, recommendation: 'Configure IDS/IPS to rate-limit or temporarily block IPs performing sequential port probing.' },
+    { attack_type: 'ARP Spoofing', severity: 'HIGH', packets_involved: 3, recommendation: 'Implement Dynamic ARP Inspection (DAI) on network switches.' }
+  ];
+
+  res.json({
+    total_packets: networkPackets.length,
+    suspicious_count: networkPackets.filter(p => p.is_suspicious).length,
+    protocols_breakdown,
+    top_talkers,
+    detected_attacks
   });
 });
 
