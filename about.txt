@@ -1,0 +1,111 @@
+================================================================================
+APP OVERVIEW: Kernel Debugging & Rootkit Detection Simulation
+================================================================================
+
+1. PURPOSE & TARGET AUDIENCE
+--------------------------------------------------------------------------------
+This application is an interactive cybersecurity simulation designed for open,
+hands-on exploration of kernel debugging, rootkit behavior, and memory forensics.
+It simulates the behavior of a Windows system infected with a kernel-mode rootkit 
+and provides simulated tools (like Task Manager and WinDbg) to detect it.
+
+The core learning goal is to make these concepts practical and approachable:
+- Cross-View Analysis (comparing User-Mode vs. Kernel-Mode data).
+- Direct Kernel Object Manipulation (DKOM) concepts.
+- System DLL Hooking detection.
+- Malware Data Obfuscation (Base64 + XOR encoding) and De-obfuscation.
+
+2. ARCHITECTURE & TECH STACK
+--------------------------------------------------------------------------------
+- Backend: Node.js with Express.js (`server.js`)
+- Frontend: Vanilla HTML5, CSS3, and JavaScript (`public/index.html`)
+- Communication: REST API via `fetch()`
+- Data Storage: In-memory JavaScript objects (no database required)
+
+3. SIMULATED DATA ENVIRONMENT (`server.js`)
+--------------------------------------------------------------------------------
+The backend maintains a hardcoded dictionary `kernelProcessData` simulating Windows 
+processes.
+
+Legitimate Simulated Processes:
+- `system.exe` (PID 4)
+- `explorer.exe` (PID 2104)
+- `notepad.exe` (PID 3456)
+- `svchost.exe` (PID 1248)
+
+Malicious Simulated Process (The Rootkit):
+- `sysmon.exe` (PID 5678)
+- Flagged with `isHidden: true`.
+- Contains a hidden module/driver called `rootkit.sys`.
+- Invisible to standard User-Mode APIs but visible in Kernel-Mode.
+
+4. CORE FEATURES & MODULES
+--------------------------------------------------------------------------------
+A. User-Mode View (Task Manager Simulator)
+   - Endpoint: `GET /api/processes/user-mode`
+   - Simulates standard Windows APIs like `CreateToolhelp32Snapshot`.
+   - Intentionally filters out any process or module marked as 'HIDDEN' to 
+     demonstrate how a rootkit evades standard detection.
+
+B. Kernel-Mode View (WinDbg Simulator)
+   - Endpoint: `GET /api/processes/kernel-mode`
+   - Simulates reading raw kernel memory (EPROCESS blocks).
+   - Returns the complete, unfiltered truth, exposing the hidden `sysmon.exe`.
+
+C. Cross-View Analysis Engine
+   - Endpoint: `GET /api/analysis/cross-view-comparison`
+   - Automatically compares the User-Mode and Kernel-Mode datasets.
+   - Detects missing processes (DKOM) and hooked System DLLs.
+
+D. Rootkit Detection Engine
+   - Endpoint: `GET /api/analysis/rootkit-detection`
+   - Acts as an automated forensic scanner.
+   - Generates actionable Indicators of Compromise (IOCs) with Critical/High 
+     severity ratings and remediation recommendations.
+
+E. WinDbg Command Emulator
+   - Endpoint: `POST /api/windbg-command`
+   - Allows users to type simulated WinDbg commands.
+   - Supported commands: 
+     - `!peb`: Shows Process Environment Block info.
+     - `!process 0 0`: Shows all EPROCESS structures (reveals rootkit).
+     - `lm`: Lists loaded modules/drivers (reveals `rootkit.sys`).
+
+F. Obfuscation Analysis (Extract Rootkit Config)
+   - Endpoint: `GET /api/analysis/obfuscated-config`
+   - Simulates dumping a malicious configuration from kernel memory.
+   - The raw JSON config (containing C2 server IPs, hidden names, etc.) is 
+     obfuscated on the backend using a single-byte XOR key (0x42 / 66 decimal) 
+     and then encoded to Base64.
+   - The frontend provides an interactive "De-obfuscator" where users input 
+     the XOR key to programmatically decode the payload via JavaScript.
+
+5. FRONTEND UI STRUCTURE (`public/index.html`)
+--------------------------------------------------------------------------------
+- Styling: Uses a "hacker/cyber" aesthetic (dark mode, monospace fonts, neon 
+  green/cyan/magenta accents, and a CSS scanline background effect).
+- Control Panel: 5 main action buttons triggering the features listed above.
+- Main Grid: Side-by-side comparison panels for User-Mode and Kernel-Mode.
+- Analysis Panels: Dynamically populating divs for Cross-View, WinDbg, Rootkit 
+  Detection, and Obfuscation.
+- Modals: Clicking on any process item opens a modal displaying detailed 
+  information (PID, Ring Level, Threads, Loaded Modules).
+
+6. HOW TO RUN
+--------------------------------------------------------------------------------
+1. Ensure Node.js is installed.
+2. Navigate to the project root directory.
+3. Run `npm install` (installs Express, CORS, etc.).
+4. Run `node server.js`
+5. Access the UI at `http://localhost:3001`
+
+7. EXTENSIBILITY (For future development)
+--------------------------------------------------------------------------------
+- Can be extended to support more WinDbg commands in the `POST` endpoint.
+- The obfuscation module can be updated to generate randomized XOR keys per session.
+- More advanced malware artifacts (like SSDT hooks or IRP hooks) can be added to 
+  the `kernelProcessData` dictionary.
+
+================================================================================
+END OF DOCUMENT
+================================================================================

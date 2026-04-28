@@ -43,14 +43,14 @@ Then open: **http://localhost:3001**
 ✓ Cross-view anomaly analysis
 ✓ Responsive design (desktop & mobile)
 
-### Usage in Class
+### Public Usage
 
-1. **Start Server** (before class):
+1. **Start Server**:
    ```bash
    npm start
    ```
 
-2. **Students Access** (during class):
+2. **Open the Simulator**:
    - URL: `http://your-server:3001`
    - Or locally: `http://localhost:3001`
 
@@ -61,12 +61,12 @@ Then open: **http://localhost:3001**
    - Click "🚨 Rootkit Detection"
    - Try WinDbg commands
 
-4. **Discuss Findings**:
+4. **Investigate Findings**:
    - Why is sysmon.exe hidden?
    - How does cross-view comparison work?
    - What detection methods revealed the rootkit?
 
-### API Endpoints (Teacher Reference)
+### API Endpoints
 
 ```
 GET  /api/processes/user-mode          → User-mode process list
@@ -157,11 +157,11 @@ kernel-debug-sim/
 
 ### Security Notes
 
-✓ Backend code hidden from students
-✓ Students see only web interface
+✓ Backend code stays server-side
+✓ Visitors use only the web interface
 ✓ All logic server-side
-✓ No student code exposure
-✓ Safe for classroom use
+✓ No client-side source exposure for detection logic
+✓ Safe public simulation environment
 ✓ Educational simulation only
 
 ### Browser Compatibility
@@ -172,21 +172,18 @@ kernel-debug-sim/
 ✓ Edge 80+
 ✓ Mobile browsers supported
 
-### Course Information
+### Author
 
-**Course:** 24CSA660 - Advanced Malware Analysis  
-**Institution:** Amrita Vishwa Vidyapeetham, Mysuru Campus  
-**Instructor:** Dr. Adwitiya Mukhopadhyay  
-**Email:** adwitiya@my.amrita.edu  
+**Developed By:** Adwitiya Mukhopadhyay
 
 ### License
 
 Educational Use Only  
-Non-commercial, academic settings  
-Credit the instructor in derivative works
+Non-commercial use  
+Credit the author in derivative works
 
 ---
 
-**Ready to teach?** Run `npm start` and share the URL with students!
+**Ready to explore?** Run `npm start` and share the URL.
 
 For complete documentation, see the other guide files included in the package.

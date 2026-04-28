@@ -71,6 +71,15 @@ const kernelProcessData = {
 
 // ==================== API ENDPOINTS ====================
 
+// Helper function to simulate malware data obfuscation (XOR + Base64)
+const obfuscateXOR = (text, key) => {
+  const buffer = Buffer.alloc(text.length);
+  for (let i = 0; i < text.length; i++) {
+    buffer[i] = text.charCodeAt(i) ^ key;
+  }
+  return buffer.toString('base64');
+};
+
 // Get user-mode process view (what Task Manager sees - incomplete)
 app.get('/api/processes/user-mode', (req, res) => {
   const userView = {};
@@ -250,6 +259,26 @@ app.post('/api/windbg-command', (req, res) => {
   }
 });
 
+// Simulate extracting an obfuscated configuration block from memory
+app.get('/api/analysis/obfuscated-config', (req, res) => {
+  const config = {
+    c2_server: '198.51.100.45',
+    c2_port: 443,
+    hidden_process: 'sysmon.exe',
+    hidden_driver: 'rootkit.sys',
+    exfiltration_dir: 'C:\\Windows\\Temp\\~dmp'
+  };
+  const jsonString = JSON.stringify(config);
+  const xorKey = 0x42; // Example key: 66 in decimal, 'B' in ASCII
+  
+  res.json({
+    source: 'Memory Dump (Address: 0xfffffa8000020000 - rootkit.sys)',
+    obfuscatedData: obfuscateXOR(jsonString, xorKey),
+    hint: 'Data is XOR obfuscated with a single-byte key (0x42), then Base64 encoded.',
+    education: 'Malware often obfuscates its configuration in memory to evade static string analysis and hide Indicators of Compromise (IOCs). Analysts must identify the encoding (e.g., Base64) and the obfuscation method (e.g., XOR) to extract these details. A single-byte XOR key is common because it is fast and easy to implement in C/C++.'
+  });
+});
+
 // Rootkit detection engine
 app.get('/api/analysis/rootkit-detection', (req, res) => {
   const indicators = [];
@@ -316,12 +345,13 @@ app.get('/api/analysis/rootkit-detection', (req, res) => {
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
   console.log(`\n🔐 Kernel Debugging Simulation Server running on port ${PORT}`);
-  console.log(`📍 Student frontend will connect to: http://localhost:${PORT}`);
+  console.log(`📍 Public frontend will connect to: http://localhost:${PORT}`);
   console.log(`\n✓ API endpoints available:`);
   console.log(`   GET  /api/processes/user-mode`);
   console.log(`   GET  /api/processes/kernel-mode`);
   console.log(`   GET  /api/analysis/cross-view-comparison`);
   console.log(`   GET  /api/process/:name/details`);
   console.log(`   POST /api/windbg-command`);
+  console.log(`   GET  /api/analysis/obfuscated-config`);
   console.log(`   GET  /api/analysis/rootkit-detection\n`);
 });
