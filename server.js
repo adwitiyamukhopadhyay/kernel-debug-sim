@@ -1,6 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
+const crypto = require('crypto');
 const app = express();
 
 app.use(cors());
@@ -118,6 +119,168 @@ for(let i=1; i<=21; i++) {
     is_suspicious: false, suspicion_reason: null
   });
 }
+
+// ==================== SIMULATED PASSWORD DATA ====================
+
+const WORDLIST = [
+  "123456", "password", "123456789", "12345678", "12345", "1234567",
+  "password1", "iloveyou", "admin", "welcome", "monkey", "dragon",
+  "master", "sunshine", "princess", "letmein", "football", "shadow",
+  "superman", "michael", "qwerty", "abc123", "mustang", "batman",
+  "trustno1", "hello", "charlie", "donald", "password2", "qwerty123",
+  "baseball", "soccer", "hockey", "ranger", "india", "tiger",
+  "hunter", "buster", "thomas", "robert", "access", "login",
+  "passw0rd", "starwars", "whatever", "blahblah", "zxcvbnm",
+  "killer", "george", "test"
+];
+
+// ==================== SIMULATED SQL INJECTION DATA ====================
+
+const sqliDb = {
+  users: [
+    { id:1, username:"admin", password:"5f4dcc3b5aa765d61d8327deb882cf99", role:"administrator", email:"admin@bank.local", account_balance: 999999 },
+    { id:2, username:"alice", password:"2b4c8a9f3e1d6b7c4a5e8f2d9c3b7a1e", role:"customer", email:"alice@gmail.com", account_balance: 12500 },
+    { id:3, username:"bob", password:"7c4a2b9f1e3d8c6b5a4e7f2d1c9b3a8e", role:"customer", email:"bob@yahoo.com", account_balance: 8750 },
+    { id:4, username:"charlie", password:"9a3c7b2f4e1d6c8b5a2e9f3d4c7b1a6e", role:"manager", email:"charlie@bank.local", account_balance: 45000 },
+    { id:5, username:"sa", password:"aad3b435b51404eeaad3b435b51404ee", role:"sysadmin", email:"sa@bank.local", account_balance: 0 }
+  ],
+  secret_data: [
+    { id:1, key:"JWT_SECRET", value:"sup3r_s3cr3t_jwt_k3y_2024" },
+    { id:2, key:"DB_PASSWORD", value:"Pr0d_DB_P@ssw0rd!" },
+    { id:3, key:"API_KEY", value:"sk-prod-a1b2c3d4e5f6g7h8i9j0" },
+    { id:4, key:"BACKUP_CODE", value:"ADMIN-9A3F-2B7C-1E8D" }
+  ]
+};
+
+const SQLI_PAYLOADS = [
+  {
+    id: 1, payload: "' OR '1'='1", name: "Always True Bypass", category: "Authentication Bypass",
+    explanation: "Closes the string parameter with a quote, then adds an OR operator followed by a tautology ('1'='1'). This makes the entire WHERE clause evaluate to true.",
+    beginner_explanation: "Imagine the database is asking 'is the password correct AND is 1=1?' — since 1 always equals 1, the whole condition becomes true regardless of the password.",
+    difficulty: "Beginner", impact: "Authentication Bypass",
+    real_world_use: "Used in the 2009 Heartland Payment Systems breach to bypass authentication forms.",
+    fix: "Use parameterized queries"
+  },
+  {
+    id: 2, payload: "' OR 1=1--", name: "Comment Injection", category: "Authentication Bypass",
+    explanation: "The -- comments out everything after it in SQL, meaning the password check is completely ignored by the database engine.",
+    beginner_explanation: "The -- is like putting everything after it in invisible ink. The database reads it but ignores it completely.",
+    difficulty: "Beginner", impact: "Authentication Bypass",
+    real_world_use: "Very common in older PHP/MySQL applications where inputs aren't sanitized.",
+    fix: "Use parameterized queries"
+  },
+  {
+    id: 3, payload: "' UNION SELECT username,password,role,email,id,account_balance FROM users--", name: "UNION Data Extraction", category: "Data Extraction",
+    explanation: "Uses the UNION operator to combine the results of the original query with the results of an injected query.",
+    beginner_explanation: "Tells the database: 'Give me the normal login results, PLUS give me everything in the users table.'",
+    difficulty: "Advanced", impact: "Data Exfiltration",
+    real_world_use: "The primary method used by tools like sqlmap to steal entire databases.",
+    fix: "Use parameterized queries"
+  },
+  {
+    id: 4, payload: "admin'--", name: "Username Comment Bypass", category: "Authentication Bypass",
+    explanation: "If the username is 'admin', this closes the quote and comments out the password check. The query executes as just checking for the admin user.",
+    beginner_explanation: "Logs you in as admin by telling the database to ignore the part of the code that checks passwords.",
+    difficulty: "Beginner", impact: "Authentication Bypass",
+    real_world_use: "A classic bypass technique often seen in basic admin panel logins.",
+    fix: "Use parameterized queries"
+  },
+  {
+    id: 5, payload: "' OR 'x'='x", name: "String Comparison Bypass", category: "Authentication Bypass",
+    explanation: "A variation of the 1=1 tautology, using string comparison instead of integer comparison.",
+    beginner_explanation: "Just another way of saying 'is true true?'. Used when databases filter out the number 1.",
+    difficulty: "Beginner", impact: "Authentication Bypass",
+    real_world_use: "Used to evade rudimentary Web Application Firewalls (WAFs) that specifically block '1=1'.",
+    fix: "Use parameterized queries"
+  },
+  {
+    id: 6, payload: "1' AND 1=2 UNION SELECT 1,2,3,4,5,6--", name: "Blind SQLi Probe", category: "Blind Injection",
+    explanation: "Forces the first query to return false (1=2), so the only output comes from the UNION SELECT part.",
+    beginner_explanation: "Intentionally breaks the normal page so the only thing displayed is the stolen data.",
+    difficulty: "Advanced", impact: "Data Exfiltration",
+    real_world_use: "Used when the application only displays one row of data at a time.",
+    fix: "Use parameterized queries"
+  },
+  {
+    id: 7, payload: "'; DROP TABLE users--", name: "Destructive Injection", category: "Destructive",
+    explanation: "Uses a semicolon to end the current statement, then executes a destructive DROP TABLE command (statement stacking).",
+    beginner_explanation: "Closes the login check, then gives a second command to delete the entire users database.",
+    difficulty: "Intermediate", impact: "Data Destruction",
+    real_world_use: "Famous 'Little Bobby Tables' technique used in vandalism and extortion attacks.",
+    fix: "Use parameterized queries and least privilege principle"
+  },
+  {
+    id: 8, payload: "' AND SLEEP(5)--", name: "Time-Based Blind SQLi", category: "Blind Injection",
+    explanation: "Forces the database to pause execution. If the page takes 5 seconds longer to load, the vulnerability is confirmed.",
+    beginner_explanation: "If the database is blind and doesn't show errors, you tell it 'If I'm right, wait 5 seconds before answering.'",
+    difficulty: "Advanced", impact: "Information Disclosure",
+    real_world_use: "Used heavily when applications suppress database errors and show generic error pages.",
+    fix: "Use parameterized queries"
+  },
+  {
+    id: 9, payload: "' AND 1=1--", name: "Boolean True Probe", category: "Blind Injection",
+    explanation: "Injects a true condition. If the page loads normally, the injection point is vulnerable.",
+    beginner_explanation: "Asking a yes/no question. If the page loads normally, the answer is 'yes'.",
+    difficulty: "Intermediate", impact: "Information Disclosure",
+    real_world_use: "The first step of an automated blind SQL injection attack.",
+    fix: "Use parameterized queries"
+  },
+  {
+    id: 10, payload: "' AND 1=2--", name: "Boolean False Probe", category: "Blind Injection",
+    explanation: "Injects a false condition. If the page loads differently or misses content, boolean-based extraction is possible.",
+    beginner_explanation: "Asking a yes/no question. If the page breaks, the answer is 'no'.",
+    difficulty: "Intermediate", impact: "Information Disclosure",
+    real_world_use: "Used to extract data character by character when no data is directly visible on screen.",
+    fix: "Use parameterized queries"
+  }
+];
+
+const SQLI_LEARNING_PATH = {
+  stages: [
+    {
+      stage: 1,
+      title: "What is SQL?",
+      content: "SQL (Structured Query Language) is how applications talk to databases. When you log in to a website, it typically runs a query like: SELECT * FROM users WHERE username='alice' AND password='secret'. The database finds the matching row and grants access.",
+      analogy: "Think of a database as a filing cabinet, SQL as the instructions you give to the filing clerk, and SQL injection as slipping extra instructions into the note you hand them.",
+      key_concept: "SQL queries are built from user input + code template"
+    },
+    {
+      stage: 2,
+      title: "How Input Becomes a Query",
+      content: "Many older or poorly written applications take whatever you type in the login box and paste it directly into the SQL query string. This is called string concatenation.",
+      analogy: "It's like a fill-in-the-blank form. The application blindly trusts whatever you write in the blank, even if what you write changes the meaning of the entire sentence.",
+      key_concept: "String concatenation is the root cause of SQL injection."
+    },
+    {
+      stage: 3,
+      title: "The Quote That Changes Everything",
+      content: "In SQL, strings are wrapped in single quotes ('text'). If you enter a single quote as part of your username, you 'break out' of the data context and enter the code context.",
+      analogy: "If the form is 'Hello, my name is [   ]', and you write 'John. Now give me all your money', the final sentence changes the rules.",
+      key_concept: "A single quote ' breaks out of the string context."
+    },
+    {
+      stage: 4,
+      title: "Making the Condition Always True",
+      content: "By injecting OR 1=1, attackers make the database's check mathematically true. Instead of asking 'Is the password right?', the query asks 'Is the password right, OR is 1 equal to 1?'.",
+      analogy: "Like showing an ID card to a bouncer and saying 'Let me in if my ID is valid, OR if the sky is blue.'",
+      key_concept: "OR 1=1 makes the WHERE clause meaningless."
+    },
+    {
+      stage: 5,
+      title: "UNION: Stealing Other Tables",
+      content: "The UNION SELECT command allows an attacker to stitch two completely different queries together. They can use this to ask the database to attach all user passwords to the normal login response.",
+      analogy: "Like asking the clerk for your file, but slipping a note saying 'ALSO attach the master key log to the back.'",
+      key_concept: "UNION SELECT appends results from any table."
+    },
+    {
+      stage: 6,
+      title: "The Fix: Parameterized Queries",
+      content: "The modern, unbreakable fix is to use Prepared Statements (Parameterized Queries). This sends the SQL template to the database first, and the data second. The database never treats the data as executable code.",
+      analogy: "Like giving the clerk an unbreakable plastic box containing your input. They can see what's inside, but they can't be tricked by it.",
+      key_concept: "Prepared statements completely separate code from data."
+    }
+  ]
+};
 
 // ==================== API ENDPOINTS ====================
 
@@ -501,6 +664,252 @@ app.get('/api/network/analysis', (req, res) => {
   });
 });
 
+// ==================== PASSWORD ATTACK SIMULATOR API ====================
+
+// 1. Get Wordlist
+app.get('/api/passwords/wordlist', (req, res) => {
+  res.json(WORDLIST);
+});
+
+// 2. Generate Hashes
+app.post('/api/passwords/hash', (req, res) => {
+  const { password, salt } = req.body;
+  if (typeof password !== 'string') return res.status(400).json({ error: 'Password string required' });
+  if (password.length > 200) return res.status(400).json({ error: 'Password too long' });
+
+  const md5 = crypto.createHash('md5').update(password).digest('hex');
+  const sha256 = crypto.createHash('sha256').update(password).digest('hex');
+  
+  let salted_sha256 = null;
+  if (salt && typeof salt === 'string' && salt.length > 0) {
+    salted_sha256 = crypto.createHash('sha256').update(salt + password).digest('hex');
+  }
+
+  res.json({
+    original: password,
+    salt_used: salt || null,
+    sha256_hash: sha256,
+    md5_hash: md5,
+    salted_sha256,
+    is_salted: !!salt
+  });
+});
+
+// 3. Crack Estimator
+app.post('/api/passwords/crack-estimate', (req, res) => {
+  const { password } = req.body;
+  if (typeof password !== 'string') return res.status(400).json({ error: 'Password string required' });
+  if (password.length > 200) return res.status(400).json({ error: 'Password too long' });
+
+  const len = password.length;
+  const has_lower = /[a-z]/.test(password);
+  const has_upper = /[A-Z]/.test(password);
+  const has_digits = /[0-9]/.test(password);
+  const has_symbols = /[^a-zA-Z0-9]/.test(password);
+
+  let charset = 0;
+  let breakdown = [];
+  if (has_lower) { charset += 26; breakdown.push('26 lowercase'); }
+  if (has_upper) { charset += 26; breakdown.push('26 uppercase'); }
+  if (has_digits) { charset += 10; breakdown.push('10 digits'); }
+  if (has_symbols) { charset += 32; breakdown.push('32 symbols'); }
+  if (charset === 0 && len > 0) { charset = 256; breakdown.push('Extended ASCII'); }
+
+  const combos = len === 0 ? 0n : BigInt(charset) ** BigInt(len);
+  const combosStr = combos.toString();
+  
+  let combosLabel = combosStr;
+  if (combos > 1000000000000000n) combosLabel = (Number(combos / 1000000000000n) / 1000).toFixed(1) + " Quadrillion";
+  else if (combos > 1000000000000n) combosLabel = (Number(combos / 1000000000n) / 1000).toFixed(1) + " Trillion";
+  else if (combos > 1000000000n) combosLabel = (Number(combos / 1000000n) / 1000).toFixed(1) + " Billion";
+  else if (combos > 1000000n) combosLabel = (Number(combos / 1000n) / 1000).toFixed(1) + " Million";
+
+  const formatTime = (seconds) => {
+    if (seconds < 1) return "Instant";
+    if (seconds < 60) return seconds.toFixed(1) + " seconds";
+    if (seconds < 3600) return (seconds / 60).toFixed(1) + " minutes";
+    if (seconds < 86400) return (seconds / 3600).toFixed(1) + " hours";
+    if (seconds < 31536000) return (seconds / 86400).toFixed(1) + " days";
+    if (seconds < 31536000000) return (seconds / 31536000).toFixed(1) + " years";
+    return "1,000+ years";
+  };
+
+  const sec_1B = Number(combos) / 1000000000;
+  const sec_100B = Number(combos) / 100000000000;
+
+  let score = len === 0 ? 0 : Math.min(100, (len * 4) + (charset > 26 ? 10 : 0) + (charset > 36 ? 15 : 0) + (charset > 62 ? 20 : 0));
+  
+  let strength_label = "Very Weak"; let strength_color = "#ff3333";
+  if (score > 80) { strength_label = "Very Strong"; strength_color = "#00ff88"; }
+  else if (score > 60) { strength_label = "Strong"; strength_color = "#88ff00"; }
+  else if (score > 40) { strength_label = "Fair"; strength_color = "#ffcc00"; }
+  else if (score > 20) { strength_label = "Weak"; strength_color = "#ff6600"; }
+
+  res.json({
+    length: len, charset_size: charset, total_combinations: combosStr,
+    combinations_label: combosLabel, time_at_1billion_per_sec: formatTime(sec_1B),
+    time_at_100billion_per_sec: formatTime(sec_100B), strength_score: score,
+    strength_label, strength_color, has_uppercase: has_upper,
+    has_lowercase: has_lower, has_digits: has_digits, has_symbols: has_symbols,
+    charset_breakdown: breakdown.length > 0 ? breakdown.join(' + ') + ` = ${charset} chars` : '0 chars'
+  });
+});
+
+// 4. Rainbow Table Lookup
+const rainbowTable = {};
+WORDLIST.forEach(w => rainbowTable[crypto.createHash('sha256').update(w).digest('hex')] = w);
+
+app.post('/api/passwords/rainbow-lookup', (req, res) => {
+  const start = process.hrtime.bigint();
+  const plaintext = rainbowTable[req.body.hash] || null;
+  res.json({ found: !!plaintext, plaintext, lookup_time_ms: Number(process.hrtime.bigint() - start) / 1000000, table_size: WORDLIST.length, message: plaintext ? 'Found in precomputed table' : 'Not found in table' });
+});
+
+// ==================== SQL INJECTION API ====================
+
+app.post('/api/sqli/login-vulnerable', (req, res) => {
+  const { username, password } = req.body;
+  const raw_query = `SELECT * FROM users WHERE username='${username}' AND password='${password}'`;
+  
+  let injection_detected = false;
+  let injection_type = null;
+  let query_type = "normal";
+  let extracted_data = [];
+  let explanation = {};
+  
+  const upperUser = (username || '').toUpperCase();
+  const upperPass = (password || '').toUpperCase();
+  const fullPayload = upperUser + " " + upperPass;
+
+  if (fullPayload.includes('DROP TABLE')) {
+      injection_detected = true;
+      query_type = "destructive_attempt";
+      injection_type = "Destructive";
+      explanation = {
+          what_happened: "The database attempted to delete the entire users table.",
+          why_it_worked: "By adding a semicolon (;), the attacker ended the first query and started a second completely new command: DROP TABLE.",
+          real_world: "This type of destructive attack can completely wipe out application databases if the DB user has too many privileges.",
+          severity: "CRITICAL"
+      };
+  } else if (fullPayload.includes('UNION SELECT')) {
+      injection_detected = true;
+      query_type = "union_attack";
+      injection_type = "UNION Data Extraction";
+      extracted_data = [...sqliDb.users, ...sqliDb.secret_data];
+      explanation = {
+          what_happened: "The query successfully combined the results of the users table with the secret_data table.",
+          why_it_worked: "The UNION operator allows an attacker to append the results of a completely different SELECT statement to the original one.",
+          real_world: "UNION-based SQL injection is the primary method used to steal massive amounts of customer data in major data breaches.",
+          severity: "CRITICAL"
+      };
+  } else if (fullPayload.includes('OR 1=1') || fullPayload.includes("OR '1'='1") || fullPayload.includes("OR 'X'='X")) {
+      injection_detected = true;
+      query_type = "always_true";
+      injection_type = "Always True Bypass";
+      extracted_data = [...sqliDb.users];
+      explanation = {
+          what_happened: "The application logged you in as the first user in the database without checking the password.",
+          why_it_worked: "The injected OR statement makes the WHERE condition mathematically true for every row. The database returns all users, and the app logs you in as the first one.",
+          real_world: "Used in the 2009 Heartland Payment Systems breach to bypass authentication forms.",
+          severity: "HIGH"
+      };
+  } else if (fullPayload.includes('--') || fullPayload.includes('#')) {
+      injection_detected = true;
+      query_type = "comment_attack";
+      injection_type = "Comment Injection";
+      
+      const cleanUsername = (username || '').split(/--|#/)[0].replace(/'/g, '').trim();
+      const user = sqliDb.users.find(u => u.username.toUpperCase() === cleanUsername.toUpperCase());
+      extracted_data = user ? [user] : [...sqliDb.users];
+
+      explanation = {
+          what_happened: "The password check was completely ignored by the database.",
+          why_it_worked: "The '--' characters tell the SQL engine that everything following them is a comment. The query effectively stops checking after the username.",
+          real_world: "Countless administrative panels have been bypassed using just 'admin'--' as the username.",
+          severity: "HIGH"
+      };
+  } else {
+      const user = sqliDb.users.find(u => u.username === username && u.password === password);
+      extracted_data = user ? [user] : [];
+      explanation = {
+          what_happened: user ? "Login successful using valid credentials." : "Login failed. Invalid username or password.",
+          why_it_worked: "The query executed exactly as the developer intended, comparing the input string against the database columns.",
+          real_world: "Standard secure application behavior (when combined with proper parameterization).",
+          severity: "LOW"
+      };
+  }
+
+  res.json({
+      success: extracted_data.length > 0,
+      user: extracted_data.length > 0 ? extracted_data[0] : null,
+      raw_query, query_type, rows_returned: extracted_data.length,
+      injection_detected, injection_type, explanation, extracted_data
+  });
+});
+
+app.post('/api/sqli/login-safe', (req, res) => {
+  const { username, password } = req.body;
+  const user = sqliDb.users.find(u => u.username === username && u.password === password);
+  const injection_attempt_detected = /('|--|#|;|UNION|SELECT|DROP|OR|AND|1=1|SLEEP)/i.test(username || '') || /('|--|#|;|UNION|SELECT|DROP|OR|AND|1=1|SLEEP)/i.test(password || '');
+
+  res.json({
+      success: !!user,
+      user: user || null,
+      raw_query: "SELECT * FROM users WHERE username=? AND password=?",
+      parameterized_values: [username, password],
+      injection_attempt_detected,
+      explanation: {
+          what_happened: injection_attempt_detected 
+              ? "The database safely processed your injection attempt as a literal string. No injection occurred." 
+              : (user ? "Login successful." : "Login failed. Invalid credentials."),
+          why_it_failed: "In safe mode, the application uses Prepared Statements. The SQL logic is compiled BEFORE the user input is inserted. The database treats the input strictly as data, never as executable code.",
+          prevention_method: "Parameterized Queries / Prepared Statements",
+          code_example: `// Node.js safe example using 'pg' or 'mysql2'\nconst query = "SELECT * FROM users WHERE username=$1 AND password=$2";\ndb.execute(query, [req.body.username, req.body.password]);`
+      }
+  });
+});
+
+app.post('/api/sqli/union-demo', (req, res) => {
+  const { payload } = req.body;
+  let stage = 0; let result_rows = []; let explanation = {};
+
+  if (payload.includes('1,2,3,4,5,6')) {
+      stage = 1; result_rows = [{ col1:1, col2:2, col3:3, col4:4, col5:5, col6:6 }];
+      explanation = {
+          what_happened: "The database returned a row with the numbers 1 through 6.",
+          technique: "Column Enumeration",
+          why_it_worked: "Because the UNION SELECT had exactly 6 columns—matching the hidden original query's 6 columns—the database accepted the syntax and appended the numbers to the results.",
+          next_step: "Replace the numbers with actual column names.",
+          real_world: "Attackers use automation (like sqlmap) to systematically guess column counts until no error is thrown.",
+          severity: "MEDIUM"
+      };
+  } else if (payload.includes('FROM users')) {
+      stage = 2; result_rows = sqliDb.users.map(u => ({ username: u.username, password: u.password, role: u.role, email: u.email, id: u.id, account_balance: u.account_balance }));
+      explanation = {
+          what_happened: "The entire users table was dumped and displayed on screen.",
+          technique: "Data Extraction",
+          why_it_worked: "We replaced the numbers from the previous step with real column names from the 'users' table. The database dutifully fetched them and appended them to the output.",
+          next_step: "Look for other sensitive tables.",
+          real_world: "This is the exact mechanism by which millions of passwords are stolen from vulnerable web applications.",
+          severity: "CRITICAL"
+      };
+  } else if (payload.includes('FROM secret_data')) {
+      stage = 3; result_rows = sqliDb.secret_data.map(s => ({ key: s.key, value: s.value, dummy1: 1, dummy2: 1, dummy3: 1, dummy4: 1 }));
+      explanation = {
+          what_happened: "Highly sensitive internal application secrets were extracted.",
+          technique: "Lateral Data Extraction",
+          why_it_worked: "We changed the FROM clause to target a different table. We still needed 6 columns to satisfy the UNION rules, so we padded the remaining 4 columns with 1s.",
+          next_step: "Use the extracted API keys or JWT secrets to compromise other systems.",
+          real_world: "In many breaches, attackers use SQLi not just for user passwords, but to steal cloud provider keys or infrastructure secrets stored in the DB.",
+          severity: "CRITICAL"
+      };
+  }
+  res.json({ stage, payload_used: payload, raw_query: `SELECT * FROM users WHERE username='' ${payload}' AND password=''`, result_rows, explanation });
+});
+
+app.get('/api/sqli/payloads-cheatsheet', (req, res) => { res.json(SQLI_PAYLOADS); });
+app.get('/api/sqli/learning-path', (req, res) => { res.json(SQLI_LEARNING_PATH); });
+
 // ==================== SERVER START ====================
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
@@ -513,5 +922,7 @@ app.listen(PORT, () => {
   console.log(`   GET  /api/process/:name/details`);
   console.log(`   POST /api/windbg-command`);
   console.log(`   GET  /api/analysis/obfuscated-config`);
-  console.log(`   GET  /api/analysis/rootkit-detection\n`);
+  console.log(`   GET  /api/analysis/rootkit-detection`);
+  console.log(`   GET  /api/sqli/learning-path`);
+  console.log(`   GET  /api/sqli/payloads-cheatsheet\n`);
 });

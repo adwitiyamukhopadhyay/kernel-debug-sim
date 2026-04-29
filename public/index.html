@@ -546,6 +546,186 @@
             animation: spin 1s linear infinite;
         }
 
+        /* Password Simulator Styles */
+        .passwords-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #00ffff;
+            padding-bottom: 10px;
+            flex-wrap: wrap;
+        }
+        .pass-tab {
+            background: rgba(13, 27, 42, 0.8);
+            color: #00ffff;
+            border: 1px solid #00ffff;
+            padding: 8px 15px;
+            cursor: pointer;
+            font-family: monospace;
+            font-size: 0.9em;
+            transition: all 0.3s ease;
+        }
+        .pass-tab:hover, .pass-tab.active {
+            background: #00ffff;
+            color: #0a0e27;
+        }
+        .pass-sub-panel {
+            display: none;
+            animation: fadeIn 0.3s ease-in-out;
+        }
+        .pass-sub-panel.active {
+            display: block;
+        }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        
+        .bf-terminal {
+            background: #050816;
+            border: 1px solid #00ff88;
+            padding: 15px;
+            font-family: 'Courier New', monospace;
+            color: #00ff88;
+            margin-top: 15px;
+            min-height: 120px;
+        }
+        .dict-list {
+            background: #050816;
+            border: 1px solid #dd00ff;
+            padding: 15px;
+            height: 250px;
+            overflow-y: auto;
+            font-family: monospace;
+            margin-top: 15px;
+        }
+        .dict-row { margin-bottom: 4px; }
+        .dict-trying { color: #00ffff; }
+        .dict-miss { color: #444466; }
+        .dict-hit { color: #00ff88; background: rgba(0,255,136,0.1); padding: 2px; }
+        
+        .hash-col-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        .hash-value {
+            color: #ff00ff;
+            word-break: break-all;
+            background: rgba(255,0,255,0.1);
+            padding: 8px;
+            border-left: 2px solid #ff00ff;
+            margin-bottom: 10px;
+            min-height: 38px;
+        }
+        .rainbow-result {
+            margin-top: 15px;
+            padding: 15px;
+            border: 1px solid transparent;
+            display: none;
+        }
+        .rainbow-result.success {
+            border-color: #00ff88;
+            background: rgba(0, 255, 136, 0.1);
+            color: #00ff88;
+        }
+        .rainbow-result.fail {
+            border-color: #ff1744;
+            background: rgba(255, 23, 68, 0.1);
+            color: #ff1744;
+        }
+
+        .strength-meter-bg {
+            background: rgba(13, 27, 42, 0.8);
+            height: 15px;
+            border-radius: 2px;
+            border: 1px solid #444;
+            margin: 10px 0;
+            overflow: hidden;
+        }
+        .strength-meter-fill {
+            height: 100%;
+            width: 0%;
+            transition: width 0.3s ease, background-color 0.3s ease;
+        }
+        .est-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+        .est-table th, .est-table td {
+            border: 1px solid #444;
+            padding: 8px;
+            text-align: left;
+        }
+        .est-table th { color: #00ffff; }
+        .est-table td { color: #c0c0c0; }
+        .check-item { margin-bottom: 5px; color: #b0b0b0; }
+        .check-yes { color: #00ff88; font-weight: bold; }
+        .check-no { color: #ff1744; font-weight: bold; }
+
+        /* SQL Injection Playground Styles */
+        .sqli-tabs { display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 2px solid #00ff88; padding-bottom: 10px; flex-wrap: wrap; }
+        .sqli-tab { background: rgba(13, 27, 42, 0.8); color: #00ff88; border: 1px solid #00ff88; padding: 8px 15px; cursor: pointer; font-family: monospace; font-size: 0.9em; transition: all 0.3s ease; }
+        .sqli-tab:hover, .sqli-tab.active { background: #00ff88; color: #0a0e27; }
+        .sqli-sub-panel { display: none; animation: fadeIn 0.3s ease-in-out; }
+        .sqli-sub-panel.active { display: block; }
+        
+        .sqli-sidebar { background: rgba(13, 27, 42, 0.8); border: 1px solid #00ffff; padding: 15px; border-radius: 4px; height: fit-content; }
+        .ref-section h4 { color: #dd00ff; margin-bottom: 8px; font-size: 0.9em; }
+        .ref-section div { color: #b0b0b0; font-size: 0.85em; margin-bottom: 4px; padding-left: 10px; border-left: 2px solid #444; cursor: help; }
+        
+        .bank-login { background: #0d1b2a; border: 1px solid #1a3a5c; border-radius: 6px; padding: 30px; margin: 0 auto; max-width: 400px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        .bank-header { font-size: 1.4em; color: #fff; text-align: center; margin-bottom: 10px; font-family: sans-serif; }
+        .bank-subtitle { color: #88aadd; font-size: 0.85em; text-align: center; margin-bottom: 25px; font-family: sans-serif; }
+        .bank-form input { width: 100%; padding: 12px; margin-bottom: 15px; background: #112233; border: 1px solid #224466; color: #fff; border-radius: 4px; font-family: sans-serif; }
+        .bank-btn { width: 100%; background: #0055ff; color: #fff; border: none; padding: 12px; border-radius: 4px; font-size: 1.1em; font-family: sans-serif; cursor: pointer; }
+        .bank-btn:hover { background: #0077ff; }
+
+        .live-query-box { background: #050816; border: 1px solid #ff3333; border-radius: 4px; padding: 15px; margin-top: 20px; font-family: 'Courier New', monospace; font-size: 1em; }
+        .live-query-box.safe { border-color: #00ff88; }
+        .live-query-box.safe .query-label { color: #00ff88; }
+        .query-normal { color: #00ffff; }
+        .query-injected { color: #ff3333; font-weight: bold; text-shadow: 0 0 8px #ff3333; }
+
+        .explanation-box { background: #111526; border-radius: 4px; overflow: hidden; margin-top: 20px; box-shadow: 0 0 20px rgba(0,0,0,0.5); }
+        .expl-section { padding: 15px; border-bottom: 1px solid #222; }
+        .expl-section:last-child { border-bottom: none; }
+        .expl-header { font-weight: bold; margin-bottom: 8px; font-size: 1.05em; }
+        .expl-content { font-size: 0.95rem; line-height: 1.7; color: #ccddff; }
+        .expl-section.what { border-left: 4px solid #00ffff; }
+        .expl-section.what .expl-header { color: #00ffff; }
+        .expl-section.why { border-left: 4px solid #dd00ff; }
+        .expl-section.why .expl-header { color: #dd00ff; }
+        .expl-section.real { border-left: 4px solid #ffcc00; }
+        .expl-section.real .expl-header { color: #ffcc00; }
+        .expl-section.fix { border-left: 4px solid #00ff88; background: rgba(0,255,136,0.05); }
+        .expl-section.fix .expl-header { color: #00ff88; }
+
+        .learning-stage { margin-bottom: 30px; position: relative; padding-left: 40px; }
+        .learning-stage::before { content: attr(data-stage); position: absolute; left: 0; top: 0; width: 28px; height: 28px; background: #00ffff; color: #000; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; box-shadow: 0 0 10px #00ffff; }
+        .learning-stage h3 { color: #00ff88; margin-bottom: 10px; }
+        .learning-stage p { color: #fff; line-height: 1.6; margin-bottom: 15px; }
+        .analogy-box { background: rgba(255,0,255,0.08); border-left: 3px solid #ff00ff; padding: 10px 15px; font-style: italic; margin-bottom: 15px; color: #ccddff; }
+        .key-concept-badge { display: inline-block; background: #00ff88; color: #000; padding: 4px 12px; border-radius: 15px; font-size: 0.85em; font-weight: bold; }
+
+        /* Toggle switch */
+        .switch { position: relative; display: inline-block; width: 60px; height: 30px; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ff3333; transition: .4s; border-radius: 30px; }
+        .slider:before { position: absolute; content: ""; height: 22px; width: 22px; left: 4px; bottom: 4px; background-color: white; transition: .4s; border-radius: 50%; }
+        input:checked + .slider { background-color: #00ff88; }
+        input:checked + .slider:before { transform: translateX(30px); }
+        
+        .union-step { background: rgba(13, 27, 42, 0.8); border: 1px solid #444; padding: 20px; border-radius: 4px; margin-bottom: 15px; transition: all 0.3s; opacity: 0.5; pointer-events: none; }
+        .union-step.active { opacity: 1; pointer-events: auto; border-color: #00ffff; box-shadow: 0 0 15px rgba(0, 255, 255, 0.1); }
+        .union-step.completed { opacity: 1; pointer-events: auto; border-color: #00ff88; }
+        
+        .payload-card-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .payload-card { background: rgba(13, 27, 42, 0.8); border: 1px solid #00ffff; border-radius: 4px; padding: 15px; display: flex; flex-direction: column; }
+        .payload-top { font-family: monospace; color: #00ffff; font-size: 1.1em; margin-bottom: 10px; word-break: break-all; background: #000; padding: 8px; border-radius: 3px; }
+        .payload-badge { display: inline-block; padding: 3px 8px; border-radius: 3px; font-size: 0.8em; font-weight: bold; margin-right: 5px; margin-bottom: 10px; color: #000; }
+        .payload-card details { margin-top: 10px; margin-bottom: 10px; cursor: pointer; color: #dd00ff; }
+        .payload-card details summary { font-weight: bold; outline: none; }
+        .payload-card details p { margin-top: 10px; color: #ccddff; font-size: 0.9em; line-height: 1.5; }
+
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
@@ -667,6 +847,8 @@
                 <button class="nav-button" data-target="panel-windbg" onclick="showWindbgTerminal()">WinDbg</button>
                 <button class="nav-button" data-target="obfuscation-panel" onclick="loadObfuscatedConfig()">Config Lab</button>
                 <button class="nav-button" data-target="panel-network" onclick="showNetworkPanel()">Network Sniffer</button>
+                <button class="nav-button" data-target="panel-passwords" onclick="showPasswordsPanel()">Password Attacks</button>
+                <button class="nav-button" data-target="panel-sqli" onclick="showSqliPanel()">SQL Injection</button>
             </nav>
         </header>
 
@@ -842,6 +1024,273 @@
                 <strong style="color: #dd00ff;">🎯 Challenge:</strong> Find the packet containing cleartext credentials. Why is this dangerous? What protocol should be used instead?
             </div>
         </div>
+
+        <!-- PASSWORD ATTACK SIMULATOR -->
+        <div class="panel analysis-panel" id="panel-passwords" style="display: none;">
+            <h2>🔑 Password Attack Simulator</h2>
+            
+            <div class="passwords-tabs">
+                <button class="pass-tab active" onclick="switchPassTab('A', this)">Brute Force</button>
+                <button class="pass-tab" onclick="switchPassTab('B', this)">Dictionary Attack</button>
+                <button class="pass-tab" onclick="switchPassTab('C', this)">Hash & Rainbow Tables</button>
+                <button class="pass-tab" onclick="switchPassTab('D', this)">Strength Estimator</button>
+            </div>
+
+            <!-- Sub-Panel A: Brute Force -->
+            <div id="pass-sub-A" class="pass-sub-panel active">
+                <h3 style="color:#00ff88; margin-bottom:15px;">Brute Force Attack Simulation</h3>
+                <div style="display:flex; gap:15px; align-items:center; margin-bottom:15px;">
+                    <label style="color:#00ffff;">Target Password (max 5 chars for demo):</label>
+                    <input type="password" id="bf-target" maxlength="5" placeholder="e.g. abc" style="width:120px;" />
+                </div>
+                <div style="margin-bottom:15px; color:#c0c0c0;">
+                    <label style="margin-right:15px;"><input type="radio" name="bf-charset" value="digits" checked> Digits only (0-9)</label>
+                    <label style="margin-right:15px;"><input type="radio" name="bf-charset" value="lower"> Lowercase (a-z)</label>
+                    <label><input type="radio" name="bf-charset" value="both"> Lowercase + Digits</label>
+                </div>
+                <div>
+                    <button onclick="startBruteForce()">▶ Launch Brute Force</button>
+                    <button onclick="stopBruteForce()" style="background:transparent; color:#ff1744; border-color:#ff1744; margin-left:10px;">⏹ Stop</button>
+                </div>
+                <div class="bf-terminal" id="bf-terminal">
+                    Waiting to start...
+                </div>
+            </div>
+
+            <!-- Sub-Panel B: Dictionary -->
+            <div id="pass-sub-B" class="pass-sub-panel">
+                <h3 style="color:#dd00ff; margin-bottom:15px;">Dictionary Attack</h3>
+                <div style="display:flex; gap:15px; align-items:center; margin-bottom:15px;">
+                    <label style="color:#00ffff;">Target Password:</label>
+                    <input type="password" id="dict-target" placeholder="e.g. iloveyou" />
+                    <button onclick="startDictionaryAttack()">📖 Run Dictionary Attack</button>
+                </div>
+                <div style="color:#b0b0b0;" id="dict-progress">0/50 words tried</div>
+                <div class="dict-list" id="dict-list"></div>
+            </div>
+
+            <!-- Sub-Panel C: Hash & Rainbow -->
+            <div id="pass-sub-C" class="pass-sub-panel">
+                <div class="hash-col-container">
+                    <div>
+                        <h3 style="color:#00ffff; margin-bottom:15px;">Hash Visualizer</h3>
+                        <input type="text" id="hash-input" placeholder="Type anything..." style="width:100%; margin-bottom:10px;" maxlength="100" oninput="debounceHash()" />
+                        <label style="color:#c0c0c0; display:block; margin-bottom:15px;">
+                            <input type="checkbox" id="hash-salt-toggle" onchange="toggleSalt()"> Add Salt
+                        </label>
+                        <input type="text" id="hash-salt-input" placeholder="Enter salt..." style="width:100%; margin-bottom:15px; display:none;" maxlength="50" oninput="debounceHash()" />
+                        
+                        <div style="color:#b0b0b0; margin-bottom:5px;">MD5:</div>
+                        <div class="hash-value" id="hash-val-md5"></div>
+                        <div style="color:#b0b0b0; margin-bottom:5px;">SHA-256:</div>
+                        <div class="hash-value" id="hash-val-sha256"></div>
+                        <div id="hash-salted-container" style="display:none;">
+                            <div style="color:#00ff88; margin-bottom:5px;">Salted SHA-256:</div>
+                            <div class="hash-value" id="hash-val-salted"></div>
+                        </div>
+                        <div class="beginner-tip" style="margin-top:20px;">
+                            💡 <strong>Notice</strong> how adding a salt completely changes the hash, even for the same password. This defeats precomputed rainbow tables.
+                        </div>
+                    </div>
+                    <div>
+                        <h3 style="color:#ff00ff; margin-bottom:15px;">Rainbow Table Lookup</h3>
+                        <p style="color:#c0c0c0; font-size:0.9em; margin-bottom:15px;">Check if a SHA-256 hash exists in our precomputed table of common passwords.</p>
+                        <input type="text" id="rainbow-input" placeholder="Paste a SHA-256 hash here..." style="width:100%; margin-bottom:15px;" />
+                        <button onclick="lookupRainbowTable()">🔍 Lookup in Rainbow Table</button>
+                        
+                        <div id="rainbow-result" class="rainbow-result"></div>
+                        
+                        <div class="indicator-box" style="margin-top:20px;">
+                            <div class="indicator-title">How it works</div>
+                            <div class="indicator-content">
+                                Rainbow tables contain millions of precomputed hash &rarr; plaintext pairs. Salting makes them useless because the attacker would need a new table for every possible salt.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sub-Panel D: Estimator -->
+            <div id="pass-sub-D" class="pass-sub-panel">
+                <h3 style="color:#00ff88; margin-bottom:15px;">Time-to-Crack Estimator</h3>
+                <input type="text" id="est-input" placeholder="Type a password..." style="width:100%; max-width:400px; margin-bottom:15px;" maxlength="100" oninput="debounceEstimate()" />
+                
+                <div style="display:flex; justify-content:space-between; color:#c0c0c0; max-width:400px;">
+                    <span>Strength: <strong id="est-label" style="color:#ff3333;">Very Weak</strong></span>
+                    <span id="est-score">0/100</span>
+                </div>
+                <div class="strength-meter-bg" style="max-width:400px;">
+                    <div class="strength-meter-fill" id="est-meter"></div>
+                </div>
+
+                <div class="hash-col-container" style="margin-top:20px;">
+                    <div>
+                        <div style="color:#00ffff; margin-bottom:10px;">Mathematics</div>
+                        <div style="color:#b0b0b0; margin-bottom:5px;">Character Set: <span id="est-charset" style="color:#fff;">0 chars</span></div>
+                        <div style="color:#b0b0b0;">Total Combos: <span id="est-combos" style="color:#fff;">0</span></div>
+                        
+                        <table class="est-table">
+                            <tr><th>Attack Speed</th><th>Time to Crack</th></tr>
+                            <tr><td>1 Billion/sec (GPU)</td><td id="est-time-gpu">Instant</td></tr>
+                            <tr><td>100 Billion/sec (Rig)</td><td id="est-time-rig">Instant</td></tr>
+                        </table>
+                    </div>
+                    <div>
+                        <div style="color:#00ffff; margin-bottom:10px;">Properties</div>
+                        <div class="check-item">[<span id="chk-upper" class="check-no">✗</span>] Has uppercase</div>
+                        <div class="check-item">[<span id="chk-lower" class="check-no">✗</span>] Has lowercase</div>
+                        <div class="check-item">[<span id="chk-digits" class="check-no">✗</span>] Has digits</div>
+                        <div class="check-item">[<span id="chk-symbols" class="check-no">✗</span>] Has symbols</div>
+                        
+                        <div class="learning-callout" style="margin-top:15px; padding:10px;">
+                            <strong style="color:#dd00ff;"> Challenge:</strong> Can you build a password that takes over 1,000 years to crack at 100 billion attempts/sec?
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SQL INJECTION PLAYGROUND -->
+        <div class="panel analysis-panel" id="panel-sqli" style="display: none;">
+            <h2>💉 SQL Injection Playground</h2>
+            <div style="display: flex; gap: 20px; flex-wrap: wrap;">
+                <!-- Left content area -->
+                <div style="flex: 1; min-width: 300px;">
+                    <div class="sqli-tabs">
+                        <button class="sqli-tab active" onclick="switchSqliTab('learn', this)">📖 Learn First</button>
+                        <button class="sqli-tab" onclick="switchSqliTab('attack', this)">🔓 Attack Lab</button>
+                        <button class="sqli-tab" onclick="switchSqliTab('union', this)">🔗 UNION Attack</button>
+                        <button class="sqli-tab" onclick="switchSqliTab('payloads', this)">📋 Payload Library</button>
+                    </div>
+
+                    <!-- Tab 1: Learn First -->
+                    <div id="sqli-sub-learn" class="sqli-sub-panel active"></div>
+
+                    <!-- Tab 2: Attack Lab -->
+                    <div id="sqli-sub-attack" class="sqli-sub-panel">
+                        <div style="display: flex; justify-content: center; margin-bottom: 20px;">
+                            <div class="sqli-toggle-container">
+                                <span id="lbl-vuln" style="color: #ff3333; font-weight: bold; margin-right: 10px;">🔴 VULNERABLE MODE</span>
+                                <label class="switch">
+                                    <input type="checkbox" id="sqli-safe-toggle" onchange="toggleSqliSafeMode()">
+                                    <span class="slider"></span>
+                                </label>
+                                <span id="lbl-safe" style="color: #444; margin-left: 10px;">🟢 SAFE MODE</span>
+                            </div>
+                        </div>
+
+                        <div class="bank-login">
+                            <div class="bank-header">🏦 SecureBank Online — Member Login</div>
+                            <div class="bank-subtitle">Please enter your credentials to access your account</div>
+                            <div class="bank-form">
+                                <input type="text" id="sqli-user" placeholder="Username" oninput="updateSqliLiveQuery()">
+                                <input type="password" id="sqli-pass" placeholder="Password" oninput="updateSqliLiveQuery()">
+                                <button class="bank-btn" onclick="submitSqliLogin()">Login</button>
+                            </div>
+                        </div>
+
+                        <div class="live-query-box" id="live-query-container">
+                            <div style="color: #ff3333; margin-bottom: 5px; font-weight: bold;">⚙️ What the server is building right now:</div>
+                            <div id="sqli-live-query" style="word-break: break-all;"></div>
+                        </div>
+                        
+                        <div id="sqli-login-result" style="display: none; margin-top: 20px;"></div>
+                        <div id="sqli-explanation-container" style="display: none; margin-top: 20px;"></div>
+                    </div>
+
+                    <!-- Tab 3: UNION Attack -->
+                    <div id="sqli-sub-union" class="sqli-sub-panel">
+                        <div style="background: rgba(0,255,255,0.05); border: 1px solid #00ffff; padding: 15px; margin-bottom: 20px; border-radius: 4px;">
+                            <h3 style="color: #00ffff; margin-bottom: 10px;">🎓 UNION Attack Tutorial — Follow these steps exactly as an attacker would</h3>
+                            <p style="color: #ccddff; font-size: 0.9em;">A UNION attack allows an attacker to extract data from other tables by appending a second query to the original one.</p>
+                        </div>
+                        <div class="union-step active" id="union-step-1">
+                            <h3 style="color: #00ff88; margin-bottom: 10px;">STEP 1 — Confirm Injection Point</h3>
+                            <p style="color: #ccddff; margin-bottom: 10px; font-size: 0.95em;">Before extracting data, an attacker first confirms the field is injectable. They do this by entering a single quote <code>'</code> and observing if the application throws an error.</p>
+                            <div class="analogy-box">Like checking if a door is unlocked before trying to open it — you don't kick it down immediately.</div>
+                            <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+                                <input type="text" id="union-input-1" value="'" readonly style="flex:1; padding:10px; background:#000; border:1px solid #00ffff; color:#00ffff; font-family:monospace;" />
+                                <button onclick="runUnionStep(1)">Try it</button>
+                            </div>
+                            <div id="union-result-1" style="display:none; margin-top: 15px;"></div>
+                        </div>
+                        <div class="union-step" id="union-step-2">
+                            <h3 style="color: #00ff88; margin-bottom: 10px;">STEP 2 — Count the Columns</h3>
+                            <p style="color: #ccddff; margin-bottom: 10px; font-size: 0.95em;">UNION SELECT requires the same number of columns as the original query. Attackers try ORDER BY 1, ORDER BY 2... or UNION SELECT 1, UNION SELECT 1,2... until an error disappears, revealing the column count.</p>
+                            <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+                                <input type="text" id="union-input-2" value="' UNION SELECT 1,2,3,4,5,6--" readonly style="flex:1; padding:10px; background:#000; border:1px solid #00ffff; color:#00ffff; font-family:monospace;" />
+                                <button onclick="runUnionStep(2)">Run Column Discovery</button>
+                            </div>
+                            <div id="union-result-2" style="display:none; margin-top: 15px;"></div>
+                        </div>
+                        <div class="union-step" id="union-step-3">
+                            <h3 style="color: #00ff88; margin-bottom: 10px;">STEP 3 — Extract the Users Table</h3>
+                            <p style="color: #ccddff; margin-bottom: 10px; font-size: 0.95em;">Now the attacker knows there are 6 columns. They replace the dummy numbers with actual column names from the users table.</p>
+                            <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+                                <input type="text" id="union-input-3" value="' UNION SELECT username,password,role,email,id,account_balance FROM users--" readonly style="flex:1; padding:10px; background:#000; border:1px solid #00ffff; color:#00ffff; font-family:monospace;" />
+                                <button onclick="runUnionStep(3)">Dump Users Table</button>
+                            </div>
+                            <div id="union-result-3" style="display:none; margin-top: 15px;"></div>
+                        </div>
+                        <div class="union-step" id="union-step-4">
+                            <h3 style="color: #00ff88; margin-bottom: 10px;">STEP 4 — Extract Secret Configuration</h3>
+                            <p style="color: #ccddff; margin-bottom: 10px; font-size: 0.95em;">An attacker doesn't stop at users. They probe for other tables containing API keys, secrets, and credentials.</p>
+                            <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+                                <input type="text" id="union-input-4" value="' UNION SELECT key,value,1,1,1,1 FROM secret_data--" readonly style="flex:1; padding:10px; background:#000; border:1px solid #00ffff; color:#00ffff; font-family:monospace;" />
+                                <button onclick="runUnionStep(4)">Dump Secret Data</button>
+                            </div>
+                            <div id="union-result-4" style="display:none; margin-top: 15px;"></div>
+                        </div>
+                        <div id="union-final" style="display:none; background: rgba(0,255,136,0.1); border: 1px solid #00ff88; padding: 20px; border-radius: 4px; margin-top: 20px;">
+                            <h3 style="color: #00ff88; margin-bottom: 10px;">🎓 What you just did — In 4 steps you:</h3>
+                            <ul style="color: #ccddff; margin-left: 20px; margin-bottom: 15px; line-height: 1.6;">
+                                <li>Found an injection point</li>
+                                <li>Determined the query structure</li>
+                                <li>Extracted all user credentials</li>
+                                <li>Stolen production secrets</li>
+                            </ul>
+                            <p style="color: #ccddff; font-style: italic; margin-bottom: 15px;">This is exactly what automated tools like sqlmap do in seconds.</p>
+                            <div style="background: rgba(0,0,0,0.5); padding: 10px; border-left: 3px solid #00ff88; color: #00ff88;">
+                                <strong>🛡️ ONE LINE fixes all of this:</strong><br>Use prepared statements / parameterized queries.
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tab 4: Payload Library -->
+                    <div id="sqli-sub-payloads" class="sqli-sub-panel"></div>
+                </div>
+
+                <!-- Right sidebar -->
+                <div class="sqli-sidebar" style="flex-basis: 280px; flex-grow: 1;">
+                    <h3 style="color: #00ffff; border-bottom: 1px solid #00ffff; padding-bottom: 10px; margin-bottom: 15px;">🧠 SQLi Quick Reference</h3>
+                    <div class="ref-section">
+                        <h4>SQL Keywords to know:</h4>
+                        <div title="Retrieves data from a database">SELECT</div>
+                        <div title="Specifies which table to query">FROM</div>
+                        <div title="Filters records based on a condition">WHERE</div>
+                        <div title="Combines the result sets of two or more SELECT statements">UNION</div>
+                        <div title="Logical operator, true if any condition is true">OR</div>
+                        <div title="Logical operator, true if all conditions are true">AND</div>
+                        <div title="Comments out the rest of the query">--</div>
+                    </div>
+                    <div class="ref-section" style="margin-top: 15px;">
+                        <h4>Danger characters:</h4>
+                        <div><strong>'</strong> (Single quote) - Breaks out of strings</div>
+                        <div><strong>"</strong> (Double quote) - Breaks out of strings</div>
+                        <div><strong>;</strong> (Semicolon) - Ends a statement, allows stacking</div>
+                        <div><strong>--</strong> (Dash dash) - Starts a comment</div>
+                        <div><strong>#</strong> (Hash) - Starts a comment in MySQL</div>
+                    </div>
+                    <div class="ref-section" style="margin-top: 15px;">
+                        <h4>Severity scale:</h4>
+                        <div style="color: #44ff44;">LOW</div>
+                        <div style="color: #ffcc00;">MEDIUM</div>
+                        <div style="color: #ff6600;">HIGH</div>
+                        <div style="color: #ff0000; text-shadow: 0 0 5px #ff0000;">CRITICAL</div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- DETAILS MODAL -->
@@ -866,6 +1315,8 @@
             document.getElementById('panel-detection').style.display = 'none';
             document.getElementById('obfuscation-panel').style.display = 'none';
             if(document.getElementById('panel-network')) document.getElementById('panel-network').style.display = 'none';
+            if(document.getElementById('panel-passwords')) document.getElementById('panel-passwords').style.display = 'none';
+            if(document.getElementById('panel-sqli')) document.getElementById('panel-sqli').style.display = 'none';
 
             document.querySelectorAll('.nav-button').forEach(button => {
                 button.classList.toggle('active', button.dataset.target === panelId);
@@ -881,6 +1332,18 @@
 
         function showHome() {
             showPanel('home-panel');
+        }
+
+        function showPasswordsPanel() {
+            showPanel('panel-passwords');
+        }
+
+        function showSqliPanel() {
+            showPanel('panel-sqli');
+            if (!document.getElementById('sqli-sub-learn').innerHTML.trim()) {
+                loadSqliLearningPath();
+                loadSqliPayloads();
+            }
         }
 
         function showProcesses() {
@@ -1401,6 +1864,419 @@
                 content.innerHTML = `<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;"><div>${chartHtml}${talkersHtml}</div><div>${attacksHtml}</div></div>`;
                 content.scrollIntoView({ behavior: 'smooth' });
             } catch (err) { console.error(err); }
+        }
+
+        // ==================== PASSWORD ATTACK SIMULATOR LOGIC ====================
+
+        function switchPassTab(tab, btnElement) {
+            document.querySelectorAll('.pass-tab').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.pass-sub-panel').forEach(p => p.classList.remove('active'));
+            if (btnElement) btnElement.classList.add('active');
+            else if (typeof event !== 'undefined' && event.target) event.target.classList.add('active');
+            document.getElementById('pass-sub-' + tab).classList.add('active');
+        }
+
+        // Sub-Panel A: Brute Force
+        let bfInterval = null;
+        function startBruteForce() {
+            stopBruteForce();
+            const target = document.getElementById('bf-target').value;
+            if(!target) return alert("Enter a target password first");
+            
+            const charsetType = document.querySelector('input[name="bf-charset"]:checked').value;
+            let chars = "";
+            if(charsetType === 'digits') chars = "0123456789";
+            else if(charsetType === 'lower') chars = "abcdefghijklmnopqrstuvwxyz";
+            else chars = "abcdefghijklmnopqrstuvwxyz0123456789";
+
+            // Validate target against charset
+            for(let i=0; i<target.length; i++) {
+                if(chars.indexOf(target[i]) === -1) {
+                    document.getElementById('bf-terminal').innerHTML = `<span style="color:#ff1744;">Error: Target password contains characters not in selected charset.</span>`;
+                    return;
+                }
+            }
+
+            const term = document.getElementById('bf-terminal');
+            const totalCombos = Math.pow(chars.length, target.length);
+            const winningAttempt = Math.floor(Math.random() * totalCombos) + 1; // pick random spot
+            let attempts = 0;
+            const batch = 5000;
+
+            term.style.backgroundColor = '#050816';
+
+            bfInterval = setInterval(() => {
+                attempts += batch;
+                let displayAttempt = "";
+                for(let i=0; i<target.length; i++) displayAttempt += chars[Math.floor(Math.random() * chars.length)];
+                
+                if(attempts >= winningAttempt) {
+                    clearInterval(bfInterval);
+                    attempts = winningAttempt;
+                    term.innerHTML = `Current Attempt: [ ${target} ]<br>Attempts Made:   ${attempts.toLocaleString()}<br>Speed:           ${(batch * 20).toLocaleString()} attempts/sec<br>Status:          <span style="color:#00ff88;font-weight:bold;">✅ CRACKED! Password: ${target} in ${attempts.toLocaleString()} attempts</span>`;
+                    term.style.backgroundColor = 'rgba(0,255,136,0.1)';
+                } else {
+                    term.innerHTML = `Current Attempt: [ ${displayAttempt} ]<br>Attempts Made:   ${attempts.toLocaleString()}<br>Speed:           ${(batch * 20).toLocaleString()} attempts/sec<br>Status:          SCANNING...`;
+                }
+            }, 50);
+        }
+        function stopBruteForce() { clearInterval(bfInterval); }
+
+        // Sub-Panel B: Dictionary
+        let dictInterval = null;
+        async function startDictionaryAttack() {
+            clearInterval(dictInterval);
+            const target = document.getElementById('dict-target').value;
+            if(!target) return alert("Enter a target password first");
+            const listDiv = document.getElementById('dict-list');
+            const progDiv = document.getElementById('dict-progress');
+            listDiv.innerHTML = '';
+            progDiv.textContent = 'Fetching wordlist...';
+            
+            try {
+                const res = await fetch(`${API_URL}/passwords/wordlist`);
+                if (!res.ok) {
+                    throw new Error(`Server returned ${res.status} (Endpoint missing? Restart server)`);
+                }
+                
+                const wordlist = await res.json();
+                let idx = 0;
+                let currentRow = null;
+                
+                dictInterval = setInterval(() => {
+                    // Update the previous row from TRYING to MISS before trying the next one
+                    if (currentRow && !currentRow.classList.contains('dict-hit')) {
+                        currentRow.className = 'dict-row dict-miss';
+                        currentRow.textContent = `[MISS]   ${wordlist[idx-1]}`;
+                    }
+
+                    if(idx >= wordlist.length) {
+                        clearInterval(dictInterval);
+                        const errDiv = document.createElement('div');
+                        errDiv.style.color = '#ff1744';
+                        errDiv.style.marginTop = '10px';
+                        errDiv.textContent = '❌ Not in dictionary. Try a stronger attack.';
+                        listDiv.appendChild(errDiv);
+                        listDiv.scrollTop = listDiv.scrollHeight;
+                        return;
+                    }
+                    const word = wordlist[idx];
+                    progDiv.textContent = `${idx+1}/${wordlist.length} words tried`;
+                    
+                    // Create new row for the current word
+                    currentRow = document.createElement('div');
+                    listDiv.appendChild(currentRow);
+
+                    if(word === target) {
+                        clearInterval(dictInterval);
+                        currentRow.className = 'dict-row dict-hit';
+                        currentRow.textContent = `[HIT] ✅ Found: ${word}`;
+                    } else {
+                        currentRow.className = 'dict-row dict-trying';
+                        currentRow.textContent = `[TRYING] ${word} ...`;
+                    }
+                    listDiv.scrollTop = listDiv.scrollHeight;
+                    idx++;
+                }, 300);
+            } catch(err) { 
+                console.error(err); 
+                progDiv.textContent = `Error: ${err.message}`;
+            }
+        }
+
+        // Utility debounce
+        function debounce(func, wait) {
+            let timeout;
+            return function(...args) {
+                clearTimeout(timeout);
+                timeout = setTimeout(() => func.apply(this, args), wait);
+            };
+        }
+
+        // Sub-Panel C: Hash Visualizer
+        function toggleSalt() {
+            const checked = document.getElementById('hash-salt-toggle').checked;
+            document.getElementById('hash-salt-input').style.display = checked ? 'block' : 'none';
+            document.getElementById('hash-salted-container').style.display = checked ? 'block' : 'none';
+            fetchHash();
+        }
+        
+        async function fetchHash() {
+            const pw = document.getElementById('hash-input').value;
+            const salt = document.getElementById('hash-salt-toggle').checked ? document.getElementById('hash-salt-input').value : '';
+            if(!pw) {
+                document.getElementById('hash-val-md5').textContent = '';
+                document.getElementById('hash-val-sha256').textContent = '';
+                document.getElementById('hash-val-salted').textContent = '';
+                return;
+            }
+            try {
+                const res = await fetch(`${API_URL}/passwords/hash`, {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ password: pw, salt })
+                });
+                const data = await res.json();
+                document.getElementById('hash-val-md5').textContent = data.md5_hash;
+                document.getElementById('hash-val-sha256').textContent = data.sha256_hash;
+                if(data.is_salted) document.getElementById('hash-val-salted').textContent = data.salted_sha256;
+            } catch(e) {}
+        }
+        const debounceHash = debounce(fetchHash, 300);
+
+        async function lookupRainbowTable() {
+            const hash = document.getElementById('rainbow-input').value.trim();
+            const resDiv = document.getElementById('rainbow-result');
+            if(!hash) return;
+            try {
+                const res = await fetch(`${API_URL}/passwords/rainbow-lookup`, {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ hash })
+                });
+                const data = await res.json();
+                resDiv.style.display = 'block';
+                if(data.found) {
+                    resDiv.className = 'rainbow-result success';
+                    resDiv.innerHTML = `<strong>✅ CRACKED!</strong><br>Plaintext: ${data.plaintext}<br><span style="font-size:0.8em; color:#c0c0c0;">Lookup Time: ${data.lookup_time_ms.toFixed(2)} ms</span>`;
+                } else {
+                    resDiv.className = 'rainbow-result fail';
+                    resDiv.innerHTML = `<strong>❌ Not Found</strong><br>Hash not found in table. (Try hashing 'password' or 'admin' from the left panel without salt)`;
+                }
+            } catch(e) {}
+        }
+
+        // Sub-Panel D: Crack Estimator
+        async function fetchEstimate() {
+            const pw = document.getElementById('est-input').value;
+            if(!pw) {
+                document.getElementById('est-meter').style.width = '0%';
+                document.getElementById('est-label').textContent = 'Very Weak';
+                document.getElementById('est-label').style.color = '#ff3333';
+                document.getElementById('est-score').textContent = '0/100';
+                return;
+            }
+            try {
+                const res = await fetch(`${API_URL}/passwords/crack-estimate`, {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ password: pw })
+                });
+                const data = await res.json();
+                
+                document.getElementById('est-meter').style.width = `${data.strength_score}%`;
+                document.getElementById('est-meter').style.backgroundColor = data.strength_color;
+                document.getElementById('est-label').textContent = data.strength_label;
+                document.getElementById('est-label').style.color = data.strength_color;
+                document.getElementById('est-score').textContent = `${data.strength_score}/100`;
+                
+                document.getElementById('est-charset').textContent = data.charset_breakdown;
+                document.getElementById('est-combos').textContent = data.combinations_label;
+                document.getElementById('est-time-gpu').textContent = data.time_at_1billion_per_sec;
+                document.getElementById('est-time-rig').textContent = data.time_at_100billion_per_sec;
+                
+                const updateCheck = (id, val) => { document.getElementById(id).textContent = val ? '✓' : '✗'; document.getElementById(id).className = val ? 'check-yes' : 'check-no'; };
+                updateCheck('chk-upper', data.has_uppercase);
+                updateCheck('chk-lower', data.has_lowercase);
+                updateCheck('chk-digits', data.has_digits);
+                updateCheck('chk-symbols', data.has_symbols);
+            } catch(e) {}
+        }
+        const debounceEstimate = debounce(fetchEstimate, 300);
+
+        // ==================== SQL INJECTION PLAYGROUND LOGIC ====================
+
+        function escapeHtml(unsafe) {
+            if (!unsafe) return '';
+            return unsafe.toString().replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+        }
+
+        function switchSqliTab(tabId, btnElement) {
+            document.querySelectorAll('.sqli-tab').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.sqli-sub-panel').forEach(p => p.classList.remove('active'));
+            if (btnElement) btnElement.classList.add('active');
+            document.getElementById('sqli-sub-' + tabId).classList.add('active');
+            if (tabId === 'attack') updateSqliLiveQuery();
+        }
+
+        function updateSqliLiveQuery() {
+            const user = document.getElementById('sqli-user').value;
+            const pass = document.getElementById('sqli-pass').value;
+            const isSafe = document.getElementById('sqli-safe-toggle').checked;
+            
+            const container = document.getElementById('live-query-container');
+            const display = document.getElementById('sqli-live-query');
+            
+            if (isSafe) {
+                container.className = 'live-query-box safe';
+                container.querySelector('div').textContent = '⚙️ What the server is building right now: (SAFE MODE)';
+                container.querySelector('div').style.color = '#00ff88';
+                display.innerHTML = `<span class="query-normal">SELECT * FROM users WHERE username=? AND password=?</span><br><br><span style="color:#b0b0b0;">Parameters: [</span><span style="color:#00ff88;">"${escapeHtml(user)}"</span><span style="color:#b0b0b0;">, </span><span style="color:#00ff88;">"${escapeHtml(pass)}"</span><span style="color:#b0b0b0;">]</span>`;
+            } else {
+                container.className = 'live-query-box';
+                container.querySelector('div').textContent = '⚙️ What the server is building right now: (VULNERABLE MODE)';
+                container.querySelector('div').style.color = '#ff3333';
+                
+                let uHtml = escapeHtml(user); let pHtml = escapeHtml(pass);
+                const dangerousChars = /('|--|#|;|UNION|SELECT|DROP|OR|AND|1=1|SLEEP)/i;
+                
+                if (dangerousChars.test(user)) uHtml = `<span class="query-injected">${uHtml}</span>`;
+                else uHtml = `<span style="color:#00ffff">${uHtml}</span>`;
+                if (dangerousChars.test(pass)) pHtml = `<span class="query-injected">${pHtml}</span>`;
+                else pHtml = `<span style="color:#00ffff">${pHtml}</span>`;
+                
+                display.innerHTML = `<span class="query-normal">SELECT * FROM users WHERE username='</span>${uHtml}<span class="query-normal">' AND password='</span>${pHtml}<span class="query-normal">'</span>`;
+            }
+        }
+
+        function toggleSqliSafeMode() {
+            const isSafe = document.getElementById('sqli-safe-toggle').checked;
+            const lblVuln = document.getElementById('lbl-vuln');
+            const lblSafe = document.getElementById('lbl-safe');
+            
+            if (isSafe) { lblVuln.style.color = '#444'; lblVuln.style.fontWeight = 'normal'; lblSafe.style.color = '#00ff88'; lblSafe.style.fontWeight = 'bold'; }
+            else { lblVuln.style.color = '#ff3333'; lblVuln.style.fontWeight = 'bold'; lblSafe.style.color = '#444'; lblSafe.style.fontWeight = 'normal'; }
+            updateSqliLiveQuery();
+        }
+
+        async function submitSqliLogin() {
+            const user = document.getElementById('sqli-user').value;
+            const pass = document.getElementById('sqli-pass').value;
+            const isSafe = document.getElementById('sqli-safe-toggle').checked;
+            const resultDiv = document.getElementById('sqli-login-result');
+            const explDiv = document.getElementById('sqli-explanation-container');
+            
+            resultDiv.innerHTML = '<div class="loading"></div>'; resultDiv.style.display = 'block'; explDiv.style.display = 'none';
+            const endpoint = isSafe ? '/api/sqli/login-safe' : '/api/sqli/login-vulnerable';
+            
+            try {
+                const res = await fetch(endpoint, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ username: user, password: pass }) });
+                const data = await res.json();
+                
+                if (isSafe) {
+                    if (data.success) resultDiv.innerHTML = `<div style="background: rgba(0,255,136,0.1); border-left: 4px solid #00ff88; padding: 15px;">✅ Login Successful — Welcome, ${escapeHtml(data.user.username)}!</div>`;
+                    else resultDiv.innerHTML = `<div style="background: rgba(255,51,51,0.1); border-left: 4px solid #ff3333; padding: 15px;">❌ Login Failed — Invalid credentials.</div>`;
+                    
+                    explDiv.innerHTML = `
+                        <div class="explanation-box">
+                            <div class="expl-section what"><div class="expl-header">💡 What just happened?</div><div class="expl-content">${escapeHtml(data.explanation.what_happened)}</div></div>
+                            <div class="expl-section why"><div class="expl-header">🧠 Why did this work (or fail)?</div><div class="expl-content">${escapeHtml(data.explanation.why_it_failed)}</div></div>
+                            <div class="expl-section fix"><div class="expl-header">🛡️ How to prevent this</div><div class="expl-content">
+                                ${data.explanation.prevention_method}<br><pre style="background:#000; padding:10px; margin-top:10px; border-radius:3px; color:#00ff88; font-family:monospace; word-break:break-all;">${escapeHtml(data.explanation.code_example)}</pre>
+                            </div></div>
+                        </div>
+                    `;
+                } else {
+                    if (data.injection_detected) {
+                        let tableHtml = '';
+                        if (data.extracted_data && data.extracted_data.length > 0) {
+                            tableHtml = '<table style="width:100%; border-collapse:collapse; margin-top:10px; font-size:0.9em; background:#000;"><tr>';
+                            Object.keys(data.extracted_data[0]).forEach(k => tableHtml += `<th style="border:1px solid #444; padding:5px; color:#00ffff;">${escapeHtml(k)}</th>`);
+                            tableHtml += '</tr>';
+                            data.extracted_data.forEach(row => {
+                                tableHtml += '<tr>'; Object.values(row).forEach(v => tableHtml += `<td style="border:1px solid #444; padding:5px; color:#ccddff;">${escapeHtml(String(v))}</td>`); tableHtml += '</tr>';
+                            });
+                            tableHtml += '</table>';
+                        }
+                        resultDiv.innerHTML = `<div style="background: rgba(255,51,51,0.1); border-left: 4px solid #ff3333; padding: 15px;">
+                                <strong style="color: #ff3333; font-size: 1.1em;">⚠️ AUTHENTICATION BYPASSED! [Severity: ${data.explanation.severity}]</strong>
+                                <p style="margin-top: 5px; color: #ccddff;">Injection Type: ${data.injection_type}</p>
+                            </div>${tableHtml}`;
+                    } else if (data.success) {
+                        resultDiv.innerHTML = `<div style="background: rgba(0,255,136,0.1); border-left: 4px solid #00ff88; padding: 15px;">✅ Login Successful — Welcome, ${escapeHtml(data.user.username)}!<br><span style="font-size:0.9em; color:#b0b0b0;">Role: ${escapeHtml(data.user.role)} | Balance: $${escapeHtml(data.user.account_balance)}</span></div>`;
+                    } else {
+                        resultDiv.innerHTML = `<div style="background: rgba(255,51,51,0.1); border-left: 4px solid #ff3333; padding: 15px;">❌ Login Failed — Invalid credentials.</div>`;
+                    }
+                    explDiv.innerHTML = `
+                        <div class="explanation-box">
+                            <div class="expl-section what"><div class="expl-header">💡 What just happened?</div><div class="expl-content">${escapeHtml(data.explanation.what_happened)}</div></div>
+                            <div class="expl-section why"><div class="expl-header">🧠 Why did this work?</div><div class="expl-content">${escapeHtml(data.explanation.why_it_worked)}</div></div>
+                            <div class="expl-section real"><div class="expl-header">🌍 Real World Connection</div><div class="expl-content">${escapeHtml(data.explanation.real_world)}</div></div>
+                            <div class="expl-section fix"><div class="expl-header">🛡️ How to prevent this</div><div class="expl-content">Use parameterized queries / prepared statements. Never concatenate user input directly into SQL strings.</div></div>
+                        </div>
+                    `;
+                }
+                explDiv.style.display = 'block';
+            } catch(err) { resultDiv.innerHTML = `<div style="color:#ff3333;">Error connecting to backend: ${err.message}</div>`; }
+        }
+
+        async function loadSqliLearningPath() {
+            try {
+                const res = await fetch(`${API_URL}/sqli/learning-path`);
+                const data = await res.json();
+                let html = '';
+                data.stages.forEach(stage => {
+                    html += `<div class="learning-stage" data-stage="${stage.stage}">
+                            <h3>${escapeHtml(stage.title)}</h3>
+                            <p>${escapeHtml(stage.content)}</p>
+                            ${stage.analogy ? `<div class="analogy-box">🧩 Analogy: ${escapeHtml(stage.analogy)}</div>` : ''}
+                            <div class="key-concept-badge">🔑 Key Concept: ${escapeHtml(stage.key_concept)}</div>
+                        </div>`;
+                });
+                html += `<div style="text-align: center; margin-top: 30px;"><button onclick="switchSqliTab('attack', document.querySelectorAll('.sqli-tab')[1])">✅ You're ready for the Attack Lab!</button></div>`;
+                document.getElementById('sqli-sub-learn').innerHTML = html;
+            } catch(e) { console.error(e); }
+        }
+
+        async function loadSqliPayloads() {
+            try {
+                const res = await fetch(`${API_URL}/sqli/payloads-cheatsheet`);
+                const data = await res.json();
+                let html = `<div style="background: rgba(0,255,255,0.05); border: 1px solid #00ffff; padding: 15px; margin-bottom: 20px; border-radius: 4px;"><p style="color: #ccddff; font-size: 0.95em;">📚 How to use this library: Each payload below demonstrates a different SQLi technique. Click '▶ Try This Payload' to see it in action in the Attack Lab. Read both the simple AND technical explanations — the simple one tells you WHAT happens, the technical one tells you WHY.</p></div><div class="payload-card-grid">`;
+                data.forEach(p => {
+                    let diffColor = p.difficulty === 'Beginner' ? '#00ff88' : (p.difficulty === 'Intermediate' ? '#ffcc00' : '#ff3333');
+                    html += `
+                        <div class="payload-card">
+                            <div class="payload-top">${escapeHtml(p.payload)}</div>
+                            <div><span class="payload-badge" style="background:#00ffff;">${escapeHtml(p.category)}</span><span class="payload-badge" style="background:${diffColor};">${escapeHtml(p.difficulty)}</span></div>
+                            <div style="color:#00ff88; font-weight:bold; margin-bottom:5px;">${escapeHtml(p.name)}</div>
+                            <p style="color:#ccddff; font-size:0.9em; margin-bottom:10px;"><strong>📖 Simple:</strong> ${escapeHtml(p.beginner_explanation)}</p>
+                            <details><summary>⚙️ Technical Detail</summary><p>${escapeHtml(p.explanation)}</p></details>
+                            <div style="color:#ffcc00; font-size:0.85em; margin-top:auto; margin-bottom:5px;">🌍 ${escapeHtml(p.real_world_use)}</div>
+                            <div style="color:#00ff88; font-size:0.85em; margin-bottom:15px;">🛡️ Fix: ${escapeHtml(p.fix)}</div>
+                            <button style="padding:8px 12px; font-size:0.9em;" onclick="tryPayload('${encodeURIComponent(p.payload)}')">▶ Try This Payload</button>
+                        </div>
+                    `;
+                });
+                html += `</div>`;
+                document.getElementById('sqli-sub-payloads').innerHTML = html;
+            } catch(e) { console.error(e); }
+        }
+
+        function tryPayload(encodedPayload) {
+            const payload = decodeURIComponent(encodedPayload);
+            switchSqliTab('attack', document.querySelectorAll('.sqli-tab')[1]);
+            document.getElementById('sqli-user').value = payload;
+            document.getElementById('sqli-pass').value = '';
+            document.getElementById('sqli-safe-toggle').checked = false;
+            toggleSqliSafeMode();
+        }
+
+        async function runUnionStep(step) {
+            const payload = document.getElementById(`union-input-${step}`).value;
+            if (step === 1) {
+                const resultDiv = document.getElementById('union-result-1'); resultDiv.style.display = 'block';
+                resultDiv.innerHTML = `<div style="color:#ff3333; font-family:monospace; background:#110000; padding:10px; border:1px solid #ff3333;">SQL syntax error near '' AND password=''' at line 1</div><div class="explanation-box" style="margin-top: 15px;"><div class="expl-section what"><div class="expl-header">💡 What just happened?</div><div class="expl-content">The application crashed and revealed an SQL error, confirming the input is not sanitized.</div></div></div>`;
+                document.getElementById('union-step-1').classList.add('completed'); document.getElementById('union-step-2').classList.add('active'); return;
+            }
+            try {
+                const res = await fetch(`${API_URL}/sqli/union-demo`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ payload }) });
+                const data = await res.json();
+                const resultDiv = document.getElementById(`union-result-${step}`); resultDiv.style.display = 'block';
+                let tableHtml = '';
+                if (data.result_rows && data.result_rows.length > 0) {
+                    tableHtml = '<table style="width:100%; border-collapse:collapse; margin-top:10px; font-size:0.9em; background:#000;"><tr>';
+                    Object.keys(data.result_rows[0]).forEach(k => tableHtml += `<th style="border:1px solid #444; padding:5px; color:#00ffff;">${escapeHtml(k)}</th>`);
+                    tableHtml += '</tr>';
+                    data.result_rows.forEach(row => { tableHtml += '<tr>'; Object.values(row).forEach(v => tableHtml += `<td style="border:1px solid #444; padding:5px; color:#ccddff;">${escapeHtml(String(v))}</td>`); tableHtml += '</tr>'; });
+                    tableHtml += '</table>';
+                }
+                resultDiv.innerHTML = `${tableHtml}<div class="explanation-box" style="margin-top: 15px;">
+                    <div class="expl-section what"><div class="expl-header">💡 What just happened?</div><div class="expl-content">${escapeHtml(data.explanation.what_happened)}</div></div>
+                    <div class="expl-section why"><div class="expl-header">🧠 Why did this work?</div><div class="expl-content">${escapeHtml(data.explanation.why_it_worked)}</div></div>
+                    <div class="expl-section real"><div class="expl-header">🌍 Real World Connection</div><div class="expl-content">${escapeHtml(data.explanation.real_world)}</div></div>
+                </div>`;
+                document.getElementById(`union-step-${step}`).classList.add('completed');
+                if (step < 4) document.getElementById(`union-step-${step+1}`).classList.add('active');
+                else document.getElementById('union-final').style.display = 'block';
+            } catch(err) { console.error(err); }
         }
 
         // Allow Enter key in WinDbg input
