@@ -6,6 +6,17 @@ const app = express();
 
 app.use(cors());
 app.use(express.json());
+
+// Enforce HTTPS in production (Render handles SSL termination)
+app.use((req, res, next) => {
+  if (process.env.NODE_ENV === 'production') {
+    if (req.headers['x-forwarded-proto'] !== 'https') {
+      return res.redirect(301, 'https://' + req.headers.host + req.url);
+    }
+  }
+  next();
+});
+
 app.use(express.static('public'));
 
 // ==================== SIMULATED KERNEL DATA ====================
@@ -281,6 +292,166 @@ const SQLI_LEARNING_PATH = {
     }
   ]
 };
+
+// ==================== SIMULATED CONTENT & ACCESSIBILITY DATA ====================
+
+const GLOSSARY_TERMS = [
+  {
+    term: "Rootkit",
+    simple: "A rootkit is a hiding tool for criminals. Imagine a burglar who breaks into your house and then hides inside your walls so you cannot see them even when you look around. A rootkit hides malware inside your computer so that even security tools cannot find it.",
+    technical: "A rootkit is malware that modifies OS kernel structures (e.g., EPROCESS lists, SSDT) to hide its presence from user-mode enumeration tools by intercepting and filtering their output.",
+    analogy: "A burglar hiding inside the walls of your home.",
+    everyday_example: "When your Task Manager does not show a suspicious program even though it is running — that is a rootkit at work.",
+    category: "Malware"
+  },
+  {
+    term: "Kernel",
+    simple: "The kernel is the innermost part of your computer's brain. It is the layer that directly controls your hardware — your screen, keyboard, memory, and storage. Everything else runs on top of it.",
+    technical: "The kernel is the core of the OS running in Ring 0 with unrestricted hardware access, managing memory, processes, and device drivers.",
+    analogy: "The engine room of a ship. Passengers (apps) never go there, but everything depends on it running correctly.",
+    everyday_example: "When you plug in a USB drive and it automatically appears — the kernel detected and mounted it.",
+    category: "Operating Systems"
+  },
+  {
+    term: "SQL Injection",
+    simple: "SQL Injection is a trick where an attacker types special commands into a website's login box or search bar that confuse the website into giving away secret information it was not supposed to.",
+    technical: "SQL injection exploits insufficient input sanitization by inserting SQL metacharacters that alter the intended query structure, allowing unauthorized data access or authentication bypass.",
+    analogy: "Imagine filling out a form that asks your name and writing 'My name is John, and also please give me everyone else's passwords.' A vulnerable system would actually comply.",
+    everyday_example: "Many major data breaches where millions of usernames and passwords were stolen started with SQL injection.",
+    category: "Web Security"
+  },
+  {
+    term: "XSS (Cross-Site Scripting)",
+    simple: "XSS is when an attacker hides a harmful instruction inside a normal-looking webpage. When you visit that page, your browser follows the hidden instruction without you knowing — it might steal your login details or redirect you to a fake website.",
+    technical: "XSS is a client-side injection attack where malicious scripts are embedded into trusted web pages and executed by victims' browsers within the page's security context.",
+    analogy: "Someone slipping a forged note into your friend's letter to you. You trust the letter because it came from your friend, so you follow the forged instructions without questioning them.",
+    everyday_example: "Attackers stealing Facebook or Gmail session cookies to log in as you without needing your password.",
+    category: "Web Security"
+  },
+  {
+    term: "Packet",
+    simple: "When your computer sends information over the internet, it breaks it into small pieces called packets — like breaking a long letter into many small envelopes. Each envelope travels separately and is reassembled at the destination.",
+    technical: "A packet is a formatted unit of data transmitted over a network, containing header fields (src/dst IP, port, protocol, TTL, flags) and a payload.",
+    analogy: "Sending a large book by mailing one page at a time in separate envelopes, each labeled with the destination and page number so they can be reassembled.",
+    everyday_example: "When you watch a YouTube video, thousands of packets arrive every second carrying small pieces of the video that your browser reassembles into the picture you see.",
+    category: "Networking"
+  },
+  {
+    term: "Brute Force Attack",
+    simple: "A brute force attack is when a criminal uses a computer program to try every possible password — thousands per second — until it finds the right one. It is the digital equivalent of trying every key on a giant keyring.",
+    technical: "A brute force attack exhaustively tries all possible combinations within a defined keyspace at machine speed, making short or simple passwords trivially crackable.",
+    analogy: "A thief trying every possible 4-digit combination on a padlock. With only 10,000 options, it takes less than 3 hours at one try per second.",
+    everyday_example: "This is why websites lock your account after 5 wrong password attempts — to stop brute force attacks.",
+    category: "Authentication Attacks"
+  },
+  {
+    term: "Firewall",
+    simple: "A firewall is a digital security guard that sits between your computer and the internet. It checks every piece of information coming in or going out and blocks anything that looks suspicious or was not invited.",
+    technical: "A firewall enforces access control policies by inspecting and filtering network traffic based on rules (IP addresses, ports, protocols, stateful connection tracking).",
+    analogy: "A security guard at a building entrance checking ID cards and a visitor list before letting anyone in or out.",
+    everyday_example: "When your home WiFi router blocks unknown devices from connecting — that is your firewall working.",
+    category: "Network Security"
+  },
+  {
+    term: "Encryption",
+    simple: "Encryption scrambles your information into an unreadable mess that can only be unscrambled by someone with the right key. Even if a criminal intercepts it, they see only gibberish.",
+    technical: "Encryption applies a cryptographic algorithm and key to transform plaintext into ciphertext, ensuring confidentiality and integrity of data at rest or in transit.",
+    analogy: "Writing a letter in a secret code that only you and your friend know. Even if someone steals the letter, they cannot read it.",
+    everyday_example: "The padlock icon in your browser's address bar means your connection is encrypted. Hackers cannot read what you type even on public WiFi.",
+    category: "Cryptography"
+  },
+  {
+    term: "Malware",
+    simple: "Malware is any software designed to harm your computer or steal your information. It includes viruses, ransomware, spyware, and more. It often arrives disguised as something harmless.",
+    technical: "Malware is malicious software encompassing viruses, worms, trojans, ransomware, spyware, adware, and rootkits — classified by propagation method, payload, and persistence mechanism.",
+    analogy: "A Trojan Horse — something that looks like a gift but contains soldiers. A free game download that secretly installs a password thief.",
+    everyday_example: "Receiving an email attachment that looks like an invoice but is actually software that locks all your files and demands payment — that is ransomware.",
+    category: "Malware"
+  },
+  {
+    term: "Phishing",
+    simple: "Phishing is when criminals send fake emails or messages pretending to be your bank, your boss, or a trusted company. They try to trick you into clicking a link and entering your password on a fake website they control.",
+    technical: "Phishing is a social engineering attack using spoofed communications to deceive targets into credential disclosure, malware installation, or financial fraud.",
+    analogy: "A fisherman casting a net with fake bait hoping someone bites. The bait looks real — an official logo, an urgent message — but the hook is hidden.",
+    everyday_example: "An email saying 'Your SBI account has been suspended, click here to verify' — clicking leads to a fake SBI page that steals your login.",
+    category: "Social Engineering"
+  },
+  {
+    term: "Hash",
+    simple: "A hash is a fingerprint for data. You put in any text and get back a unique fixed-length code. The same text always gives the same fingerprint. Even changing one letter gives a completely different fingerprint. You cannot reverse it back to the original text.",
+    technical: "A cryptographic hash function produces a fixed-size digest from arbitrary input, with properties of determinism, avalanche effect, pre-image resistance, and collision resistance.",
+    analogy: "Like grinding a document through a shredder in a very specific pattern. The shreds look random but the same document always produces the same pattern of shreds — and you cannot reconstruct the document from the shreds.",
+    everyday_example: "Websites store your password as a hash, not the actual password. When you log in, they hash what you typed and compare — so even the website does not know your real password.",
+    category: "Cryptography"
+  },
+  {
+    term: "Session Cookie",
+    simple: "After you log in to a website, it gives your browser a special token called a session cookie — like a visitor badge. Every time you click something, your browser shows this badge and the website lets you through. If someone steals this badge, they can pretend to be you.",
+    technical: "A session cookie is an HTTP cookie containing a session identifier that maps to server-side session state, used for stateful authentication across stateless HTTP requests.",
+    analogy: "A temporary visitor badge at an office. Once issued, anyone wearing it gets access — the receptionist does not ask for ID again. If stolen, the thief has full access.",
+    everyday_example: "Staying logged in to Gmail even after closing and reopening the browser — that is your session cookie at work.",
+    category: "Web Security"
+  }
+];
+
+const MODE_DESCRIPTIONS = {
+  explorer: {
+    name: "Explorer Mode",
+    emoji: "🟢",
+    tagline: "Perfect if you are new to all of this",
+    description: "We will explain everything in plain everyday language. No technical jargon. Every concept gets a real-life analogy. You will understand what hackers do and why it matters to you personally — even if you have never written a line of code.",
+    suitable_for: ["Complete beginners", "Senior citizens", "Homemakers", "Government employees", "Small business owners", "Anyone curious about staying safe online"],
+    what_you_will_learn: [
+      "How hackers break into accounts and how to stop them",
+      "Why some passwords are dangerous and others are safe",
+      "How criminals steal information from websites",
+      "Simple steps to protect yourself and your family online"
+    ],
+    language_level: "Plain English — no technical terms without explanation"
+  },
+  learner: {
+    name: "Learner Mode",
+    emoji: "🟡",
+    tagline: "For people comfortable with technology",
+    description: "You use computers and smartphones daily. We will explain cybersecurity concepts clearly with some technical detail, real examples, and hands-on simulations. The right balance of accessible and accurate.",
+    suitable_for: ["Office professionals", "Students", "IT support staff", "Teachers", "Journalists"],
+    what_you_will_learn: [
+      "How common cyberattacks actually work technically",
+      "How to recognize and respond to threats",
+      "Security best practices for organizations",
+      "How to read and understand security news"
+    ],
+    language_level: "Clear technical language with explanations"
+  },
+  hacker: {
+    name: "Hacker Mode",
+    emoji: "🔴",
+    tagline: "Full technical depth — no hand-holding",
+    description: "You have a technical background. All simulations run at full depth with complete technical explanations, raw data, code-level details, and professional terminology.",
+    suitable_for: ["CS students", "Security researchers", "Developers", "IT professionals", "CTF participants"],
+    what_you_will_learn: [
+      "Deep technical mechanics of each attack",
+      "Kernel-level and protocol-level detail",
+      "Professional security tooling concepts",
+      "How to think like a penetration tester"
+    ],
+    language_level: "Full technical depth — professional terminology"
+  }
+};
+
+const DAILY_TIPS = [
+  { day: 0, tip_simple: "Check if your email was in a data breach.", tip_detail: "Millions of emails and passwords are leaked every year. Visit haveibeenpwned.com to see if yours is exposed.", action: "Search your email on haveibeenpwned.com", why_it_matters: "If your password was leaked, hackers will try using it on your bank and email accounts.", difficulty: "Very Easy" },
+  { day: 1, tip_simple: "Enable two-factor authentication (2FA) today.", tip_detail: "2FA means you need both your password and your phone to log in. Even if a hacker steals your password, they cannot get in.", action: "Turn on 2FA for your main email account", why_it_matters: "It stops 99% of automated account hacks dead in their tracks.", difficulty: "Easy" },
+  { day: 2, tip_simple: "Never click links in unexpected SMS messages.", tip_detail: "Criminals send fake package delivery or bank alerts via SMS to steal your passwords. This is called 'smishing'.", action: "Delete suspicious texts and go directly to the official app or website instead.", why_it_matters: "Clicking can lead you to a fake website designed to drain your bank account.", difficulty: "Very Easy" },
+  { day: 3, tip_simple: "Check your bank statement weekly.", tip_detail: "Cybercriminals often test stolen credit cards with very small charges ($1 or $2) before making big purchases.", action: "Log into your bank app and review the last 7 days of transactions.", why_it_matters: "Catching fraud early makes it much easier to get your money back.", difficulty: "Easy" },
+  { day: 4, tip_simple: "Use a different password for every website.", tip_detail: "If you reuse a password and one website gets hacked, criminals will try that password everywhere else.", action: "Start using a Password Manager (like Bitwarden or 1Password) to remember them for you.", why_it_matters: "It prevents a breach at a minor website from compromising your main email or bank.", difficulty: "Moderate" },
+  { day: 5, tip_simple: "Lock your phone with a PIN of at least 6 digits.", tip_detail: "A 4-digit PIN only has 10,000 combinations. A 6-digit PIN has 1,000,000 combinations, making it 100 times harder to guess.", action: "Change your phone unlock code from 4 digits to 6 digits.", why_it_matters: "Your phone contains your entire digital life, including access to your money and emails.", difficulty: "Very Easy" },
+  { day: 6, tip_simple: "Turn off Bluetooth when you are not using it.", tip_detail: "Leaving Bluetooth on in public places allows attackers to track your device or potentially connect to it without your knowledge.", action: "Swipe down on your phone and disable Bluetooth when walking in public.", why_it_matters: "It closes an invisible door to your device and saves battery life.", difficulty: "Very Easy" }
+];
+
+app.get('/api/content/glossary', (req, res) => res.json(GLOSSARY_TERMS));
+app.get('/api/content/mode-descriptions', (req, res) => res.json(MODE_DESCRIPTIONS));
+app.get('/api/content/daily-tips', (req, res) => res.json(DAILY_TIPS));
 
 // ==================== API ENDPOINTS ====================
 
@@ -910,10 +1081,244 @@ app.post('/api/sqli/union-demo', (req, res) => {
 app.get('/api/sqli/payloads-cheatsheet', (req, res) => { res.json(SQLI_PAYLOADS); });
 app.get('/api/sqli/learning-path', (req, res) => { res.json(SQLI_LEARNING_PATH); });
 
+// ==================== XSS ATTACK LAB DATA + API ====================
+
+const commentStore = [];
+const searchLog = [];
+const stolenCookies = [];
+const simulatedCookies = {
+  session_id: "a3f8b2c9d4e5f6a7b8c9d0e1f2a3b4c5",
+  user: "alice",
+  role: "customer",
+  auth_token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.fake",
+  remember_me: "true"
+};
+
+const XSS_LEARNING_PATH = {
+  stages: [
+    {
+      stage: 1,
+      title: "What is XSS?",
+      content: "Cross-Site Scripting (XSS) happens when an attacker manages to inject malicious JavaScript into a web page that other users visit. The browser has no way to tell the difference between the website's legitimate JavaScript and the attacker's injected code - it runs both.",
+      analogy: "Imagine a restaurant where customers can write suggestions on a shared notepad that the waiter reads aloud to every new customer. If someone writes 'Say the food is poisoned!' on the notepad, the waiter will faithfully read it to everyone - even though it came from a customer, not the restaurant.",
+      key_concept: "Browsers trust ALL JavaScript on a page equally"
+    },
+    {
+      stage: 2,
+      title: "The Three Types of XSS",
+      content: "Stored XSS: The malicious script is saved in the database and served to every visitor. Reflected XSS: The script is in the URL and reflected back immediately - victims must click a crafted link. DOM-based XSS: The attack happens entirely in the browser using URL fragments - the server never even sees the payload.",
+      analogy: "Stored = graffiti on a wall everyone walks past. Reflected = a boomerang you throw at someone. DOM-based = a magic trick that happens in the audience, not on stage.",
+      key_concept: "XSS can be persistent, transient, or client-side only"
+    },
+    {
+      stage: 3,
+      title: "What Attackers Do With XSS",
+      content: "XSS gives attackers the power to run any JavaScript as if they were the website. This means: stealing session cookies to hijack accounts, logging every keystroke, redirecting users to phishing pages, defacing the website, or using the victim's browser to attack other systems.",
+      key_concept: "XSS = arbitrary code execution in the victim's browser"
+    },
+    {
+      stage: 4,
+      title: "Why Cookies Are the Primary Target",
+      content: "Session cookies are the keys to a user's account. Once stolen, an attacker can paste the cookie into their own browser and the website thinks they ARE that user - no password needed. The attack works even if the password is long and complex.",
+      analogy: "Your session cookie is like your hotel key card. If someone copies it, they can walk into your room - the door doesn't ask for your passport.",
+      key_concept: "Cookie theft bypasses passwords entirely"
+    },
+    {
+      stage: 5,
+      title: "Prevention: Sanitization + CSP",
+      content: "Two layers of defense: Output encoding ensures special characters like < > are rendered as text, never as HTML tags. Content Security Policy (CSP) tells the browser to reject scripts that weren't explicitly approved - even if they somehow got into the page.",
+      key_concept: "Encode output + enforce CSP = XSS defeated"
+    }
+  ]
+};
+
+function sanitizeXssInput(value = '') {
+  return String(value)
+    .replace(/<\s*script\b[^>]*>[\s\S]*?<\s*\/\s*script\s*>/gi, '')
+    .replace(/\son\w+\s*=\s*(['"]).*?\1/gi, '')
+    .replace(/\son\w+\s*=\s*[^\s>]+/gi, '')
+    .replace(/javascript\s*:/gi, '')
+    .replace(/[<>]/g, '');
+}
+
+function detectXssIndicators(value = '') {
+  const input = String(value);
+  const indicators = [];
+  if (/<\s*script\b/i.test(input)) indicators.push("script tag");
+  if (/\son\w+\s*=/i.test(input)) indicators.push("inline event handler");
+  if (/javascript\s*:/i.test(input)) indicators.push("javascript: protocol");
+  if (/<\s*(img|svg|iframe|object|embed|body|input)\b/i.test(input)) indicators.push("HTML injection sink");
+  if (/(document\.cookie|localStorage|fetch\s*\(|XMLHttpRequest|location\s*=)/i.test(input)) indicators.push("browser API abuse");
+  return indicators;
+}
+
+function threatLevel(indicators) {
+  if (indicators.some(i => i === "browser API abuse")) return "CRITICAL";
+  if (indicators.some(i => i === "script tag" || i === "inline event handler")) return "HIGH";
+  if (indicators.length > 0) return "MEDIUM";
+  return "NONE";
+}
+
+function nodeSanitizationSnippet() {
+  return `function sanitizeInput(input = '') {
+  return String(input)
+    .replace(/<\\s*script\\b[^>]*>[\\s\\S]*?<\\s*\\/\\s*script\\s*>/gi, '')
+    .replace(/\\son\\w+\\s*=\\s*(['"]).*?\\1/gi, '')
+    .replace(/javascript\\s*:/gi, '')
+    .replace(/[<>]/g, '');
+}
+
+app.post('/comment', (req, res) => {
+  const safeComment = sanitizeInput(req.body.comment);
+  res.send({ comment: safeComment });
+});`;
+}
+
+function storedXssExplanation(wasSanitized, containsScript) {
+  if (wasSanitized) {
+    return {
+      what_happened: containsScript ? "The comment contained an XSS payload, but safe mode stripped the dangerous HTML before storing it." : "The comment was stored after passing through the sanitizer. No executable markup was detected.",
+      why_it_works: "Sanitization removes script tags, inline event handlers such as onerror, javascript: URLs, and angle brackets before the browser ever receives them as HTML.",
+      real_world: "Stored XSS has appeared in real products such as CVE-2019-19781 Citrix ADC/Gateway exploitation chains, where attacker-controlled input could lead to code execution paths. The same lesson applies: untrusted content must not become executable content.",
+      analogy: "A bouncer checks every note before pinning it to the community board. Anything that looks like an instruction to harm people gets crossed out first.",
+      prevention: "Sanitize input, encode output, and render user comments with textContent instead of innerHTML. Add CSP as a second layer.",
+      code_example: nodeSanitizationSnippet()
+    };
+  }
+  return {
+    what_happened: containsScript ? "The application stored the attacker's HTML exactly as submitted. When the feed renders it as HTML, the payload becomes part of the page." : "The comment was stored raw. This input was harmless, but the application is still vulnerable because it would also store malicious HTML.",
+    why_it_works: "Browsers parse innerHTML as real HTML. If user input contains a script tag or an event handler, the browser treats it like code from the website itself.",
+    real_world: "The Samy worm on MySpace in 2005 used stored XSS to spread automatically through user profiles and reached more than one million profiles in about a day.",
+    analogy: "It is like letting anyone write instructions on a public announcement board, then having staff follow every instruction without checking who wrote it.",
+    prevention: "Never insert raw user input with innerHTML. Store a cleaned version, encode output, and prefer textContent for comments.",
+    code_example: nodeSanitizationSnippet()
+  };
+}
+
+app.post('/api/xss/comment', (req, res) => {
+  const { username = 'anonymous', comment = '', sanitized = false } = req.body;
+  const indicators = detectXssIndicators(comment);
+  const contains_script = indicators.length > 0;
+  const safeComment = sanitizeXssInput(comment);
+  const stored = {
+    id: commentStore.length + 1,
+    username: sanitizeXssInput(username).slice(0, 40) || 'anonymous',
+    comment_raw: String(comment),
+    comment_sanitized: sanitized ? safeComment : String(comment),
+    timestamp: new Date().toISOString(),
+    contains_script,
+    xss_type: contains_script ? "stored" : "clean",
+    threat_level: sanitized && !detectXssIndicators(safeComment).length ? "NONE" : threatLevel(indicators)
+  };
+  commentStore.push(stored);
+  res.json({
+    success: true,
+    stored_comment: stored,
+    explanation: storedXssExplanation(Boolean(sanitized), contains_script)
+  });
+});
+
+app.get('/api/xss/comments', (req, res) => {
+  res.json(commentStore);
+});
+
+app.post('/api/xss/search', (req, res) => {
+  const { query = '', sanitized = false } = req.body;
+  const indicators = detectXssIndicators(query);
+  const safe = sanitizeXssInput(query);
+  searchLog.push({
+    query: String(query),
+    sanitized: Boolean(sanitized),
+    contains_xss: indicators.length > 0,
+    timestamp: new Date().toISOString()
+  });
+  res.json({
+    query_received: String(query),
+    reflected_html: `<h2>Results for: ${String(query)}</h2>`,
+    sanitized_html: `<h2>Results for: ${safe}</h2>`,
+    sanitized_mode: Boolean(sanitized),
+    contains_xss: indicators.length > 0,
+    xss_indicators: indicators,
+    explanation: {
+      what_happened: indicators.length > 0
+        ? "The search page reflected the query back into the response. In vulnerable mode, the browser would parse the payload as HTML instead of displaying it as text."
+        : "The search page reflected normal text. Nothing executed, but reflected pages are dangerous when they echo untrusted input as HTML.",
+      why_reflected_xss_differs_from_stored: "Reflected XSS is not saved in the database. It exists only in a request and response, usually after a victim clicks a crafted link.",
+      attack_vector: "An attacker sends a link like /search?q=<script>steal_cookies()</script>. The victim's browser requests it, the server reflects it, and the browser runs it.",
+      real_world: "Reflected XSS was a long-running class in many Google, Yahoo, and Microsoft bug bounty reports, and it is still tracked in CVEs across web products every year.",
+      analogy: "Stored XSS is graffiti left on a wall. Reflected XSS is tricking someone into holding a mirror that bounces a dangerous message back into their own eyes.",
+      prevention: "Encode reflected output with HTML escaping, validate expected input, and set a CSP that blocks inline script execution."
+    }
+  });
+});
+
+app.post('/api/xss/steal-cookie', (req, res) => {
+  const { payload = '', cookie_data = simulatedCookies } = req.body;
+  const stolen = {
+    payload: String(payload),
+    stolen_data: cookie_data && typeof cookie_data === 'object' ? cookie_data : simulatedCookies,
+    timestamp: new Date().toISOString(),
+    source: "victim-browser",
+    destination: "attacker-server.evil.com"
+  };
+  stolenCookies.push(stolen);
+  res.json({
+    received_at: "attacker-server.evil.com",
+    stolen_data: stolen.stolen_data,
+    timestamp: stolen.timestamp,
+    what_attacker_can_do: [
+      "Impersonate alice on SecureBank",
+      "Access all account functions without password",
+      "Maintain access until session expires or password changes",
+      "Sell session token on dark web marketplaces"
+    ],
+    explanation: {
+      what_happened: "The simulated XSS payload read the victim's cookies and sent them to an attacker-controlled server.",
+      why_cookies_are_valuable: "Session cookies prove a user has already logged in. If an attacker steals one, the server may treat the attacker as the victim.",
+      httponly_explanation: "HttpOnly cookies cannot be read by JavaScript through document.cookie. That does not stop every XSS impact, but it blocks the classic cookie-stealing payload.",
+      real_world: "Session hijacking through XSS has been a core attack pattern for decades; the Samy worm and many account-takeover bug bounty reports relied on browser-trusted script execution.",
+      prevention: "Set cookies with HttpOnly, Secure, and SameSite flags; sanitize/encode output; rotate sessions after login; and enforce CSP."
+    }
+  });
+});
+
+app.get('/api/xss/stolen-cookies', (req, res) => {
+  res.json(stolenCookies);
+});
+
+app.get('/api/xss/csp-policies', (req, res) => {
+  res.json({
+    vulnerable: {
+      policy: "none",
+      header: "No Content-Security-Policy header set",
+      explanation: "Without CSP, the browser will execute any script regardless of where it came from or how it got into the page.",
+      what_attacker_can_do: "Run injected inline scripts, load third-party scripts, embed risky objects, and turn one missed sanitization bug into full browser-side code execution."
+    },
+    protected: {
+      policy: "strict",
+      header: "Content-Security-Policy: default-src 'self'; script-src 'self'; object-src 'none'",
+      explanation: "With this CSP, the browser will ONLY execute scripts loaded from the same origin. Inline scripts and injected scripts are blocked entirely.",
+      what_it_blocks: "Inline script tags, inline event handlers, javascript: URLs, plugin objects, and scripts loaded from unapproved domains.",
+      browser_error: "Refused to execute inline script because it violates the following Content Security Policy directive: script-src 'self'"
+    }
+  });
+});
+
+app.get('/api/xss/learning-path', (req, res) => {
+  res.json(XSS_LEARNING_PATH);
+});
+
+app.delete('/api/xss/reset', (req, res) => {
+  commentStore.length = 0;
+  stolenCookies.length = 0;
+  searchLog.length = 0;
+  res.json({ success: true, message: "Lab reset complete" });
+});
+
 // ==================== SERVER START ====================
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
-  console.log(`\n🔐 Kernel Debugging Simulation Server running on port ${PORT}`);
+  console.log(`\n🔐 SafeTrace Server running on port ${PORT}`);
   console.log(`📍 Public frontend will connect to: http://localhost:${PORT}`);
   console.log(`\n✓ API endpoints available:`);
   console.log(`   GET  /api/processes/user-mode`);
@@ -924,5 +1329,13 @@ app.listen(PORT, () => {
   console.log(`   GET  /api/analysis/obfuscated-config`);
   console.log(`   GET  /api/analysis/rootkit-detection`);
   console.log(`   GET  /api/sqli/learning-path`);
-  console.log(`   GET  /api/sqli/payloads-cheatsheet\n`);
+  console.log(`   GET  /api/content/glossary`);
+  console.log(`   GET  /api/content/mode-descriptions`);
+  console.log(`   GET  /api/content/daily-tips`);
+  console.log(`   GET  /api/sqli/payloads-cheatsheet`);
+  console.log(`   GET  /api/xss/learning-path`);
+  console.log(`   POST /api/xss/comment`);
+  console.log(`   POST /api/xss/search`);
+  console.log(`   POST /api/xss/steal-cookie`);
+  console.log(`   GET  /api/xss/csp-policies\n`);
 });
