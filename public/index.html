@@ -301,6 +301,11 @@
             font-size: 1em;
         }
 
+        /* Touch target accessibility */
+        button, .nav-button, .mode-pill, .glossary-toggle, .start-card { min-height: 44px; }
+        .close-btn { min-width: 44px; min-height: 44px; display: flex; align-items: center; justify-content: center; }
+        .mode-card-list { color: #ccddff; font-size: 0.9em; margin: 10px 0 10px 20px; line-height: 1.5; }
+
         button {
             padding: 12px 20px;
             background: linear-gradient(135deg, #00ff88 0%, #00ffff 100%);
@@ -545,8 +550,8 @@
         .welcome-header { margin-bottom: 40px; }
         .welcome-header h1 { font-size: 3em; margin: 10px 0; color: #fff; text-shadow: 0 0 15px rgba(255,255,255,0.5); }
         .welcome-header p { font-size: 1.2em; color: #ccddff; max-width: 600px; margin: 0 auto; }
-        .mode-cards { display: flex; gap: 20px; justify-content: center; max-width: 1200px; flex-wrap: wrap; }
-        .mode-card { flex: 1; min-width: 300px; max-width: 350px; background: rgba(255,255,255,0.05); padding: 30px 20px; border-radius: 12px; text-align: left; transition: all 0.3s ease; display: flex; flex-direction: column; cursor: pointer; }
+        .mode-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; max-width: 1200px; width: 100%; margin: 0 auto; }
+        .mode-card { background: rgba(255,255,255,0.05); padding: 30px 20px; border-radius: 12px; text-align: left; transition: all 0.3s ease; display: flex; flex-direction: column; cursor: pointer; }
         .mode-card:hover { transform: scale(1.03); }
         .mode-card.explorer { border: 2px solid #00ff88; background: rgba(0,255,136,0.08); }
         .mode-card.explorer:hover { box-shadow: 0 0 30px rgba(0,255,136,0.3); }
@@ -583,12 +588,15 @@
         .mode-explorer .glossary-panel { border-left-color: #00ff88; }
         .glossary-panel.open { transform: translateX(0); box-shadow: -10px 0 30px rgba(0,0,0,0.8); }
         .glossary-header { padding: 20px; border-bottom: 1px solid rgba(0,255,255,0.2); display: flex; justify-content: space-between; align-items: center; }
-        .glossary-body { flex: 1; overflow-y: auto; padding: 20px; }
+        .glossary-body { flex: 1; overflow-y: auto; padding: 20px 20px 80px 20px; }
         .glossary-term-card { background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; margin-bottom: 15px; overflow: hidden; }
-        .glossary-term-title { padding: 12px 15px; cursor: pointer; font-weight: bold; color: #fff; background: rgba(255,255,255,0.05); display: flex; justify-content: space-between; }
+        .glossary-term-title { padding: 12px 15px; cursor: pointer; font-weight: bold; color: #fff; background: rgba(255,255,255,0.05); display: flex; justify-content: space-between; align-items: center; min-height: 44px; }
         .glossary-term-title:hover { background: rgba(255,255,255,0.1); }
-        .glossary-term-content { padding: 15px; display: none; font-family: sans-serif; font-size: 0.9em; line-height: 1.5; color: #ccddff; }
-        .glossary-term-card.expanded .glossary-term-content { display: block; }
+        .glossary-term-content { max-height: 0; overflow: hidden; padding: 0 15px; opacity: 0; transition: max-height 0.3s ease, padding 0.3s ease, opacity 0.3s ease; font-family: sans-serif; font-size: max(0.9em, 14px); line-height: 1.5; color: #ccddff; }
+        .glossary-term-card.expanded .glossary-term-content { max-height: 800px; padding: 15px; opacity: 1; }
+        .glossary-toggle-icon { font-size: 1.5em; line-height: 1; width: 24px; text-align: center; display: inline-block; }
+        .glossary-toggle-icon::after { content: '+'; }
+        .glossary-term-card.expanded .glossary-toggle-icon::after { content: '\2212'; }
         
         /* Jargon Highlighting */
         .mode-explorer .jargon { border-bottom: 1px dotted #00ff88; cursor: help; position: relative; }
@@ -1065,6 +1073,23 @@
                 content: "";
                 flex: 0 0 1px;
             }
+        }
+        @media (max-width: 767px) {
+            .mode-cards { grid-template-columns: 1fr 1fr; }
+            .mode-card.hacker { grid-column: 1 / -1; }
+        }
+        @media (max-width: 480px) {
+            .mode-cards { grid-template-columns: 1fr; gap: 16px; }
+            .mode-card { padding: 24px; }
+            .mode-icon { width: 48px; height: 48px; font-size: 28px; line-height: 48px; display: flex; align-items: center; justify-content: center; margin-bottom: 12px; }
+            .mode-card h2 { font-size: 22px; }
+            .mode-card-list li { font-size: 13px; line-height: 1.5; }
+            .mode-btn { height: 52px; font-size: 16px; border-radius: 12px; width: 100%; }
+            .glossary-panel { width: 100vw; }
+            .kaveri-avatar { width: 44px; height: 44px; font-size: 22px; }
+        }
+        @media (max-width: 400px) {
+            .mode-pill { font-size: 11px; padding: 8px 12px; }
         }
         @media (max-width: 820px) {
             .stat-grid {
@@ -1877,8 +1902,8 @@ document.getElementById(<span class="str">'welcome'</span>)
                             <div class="mode-tagline">"${m.tagline}"</div>
                             <div style="flex-grow:1; margin-bottom:20px;">
                                 <strong style="color:#fff;">Perfect for:</strong><br>
-                                <ul style="color:#ccddff; font-size:0.9em; margin:10px 0 10px 20px; line-height:1.5;">
-                                    ${m.suitable_for.slice(0,3).map(s => `<li>${s}</li>`).join('')}
+                            <ul class="mode-card-list">
+                                ${m.suitable_for.slice(0,4).map(s => `<li>${s}</li>`).join('')}
                                 </ul>
                                 <div style="font-size:0.85em; color:#aaa; font-style:italic; border-top:1px solid rgba(255,255,255,0.1); padding-top:10px; margin-top:10px;">${m.language_level}</div>
                             </div>
@@ -2047,12 +2072,12 @@ document.getElementById(<span class="str">'welcome'</span>)
             let html = '';
             glossaryData.forEach(item => {
                 html += `<div class="glossary-term-card" onclick="this.classList.toggle('expanded')">
-                    <div class="glossary-term-title">${escapeHtml(item.term)} <span>+</span></div>
+                    <div class="glossary-term-title">${escapeHtml(item.term)} <span class="glossary-toggle-icon"></span></div>
                     <div class="glossary-term-content">
-                        <div class="explorer-only learner-only" style="margin-bottom:10px;"><strong>Simple:</strong> ${escapeHtml(item.simple)}</div>
-                        <div class="explorer-only" style="margin-bottom:10px; color:#ff00ff; font-style:italic;"><strong>Analogy:</strong> ${escapeHtml(item.analogy)}</div>
+                        <div style="margin-bottom:10px;"><strong>Simple:</strong> ${escapeHtml(item.simple)}</div>
+                        <div class="explorer-only" style="margin-bottom:10px; color:#ccddff; font-style:italic; border-left:3px solid #ff00ff; padding:8px; background:rgba(255,0,255,0.05);"><strong>Analogy:</strong> ${escapeHtml(item.analogy)}</div>
+                        <div class="explorer-only learner-only" style="margin-bottom:10px; color:#ccddff; border-left:3px solid #00ff88; padding:8px; background:rgba(0,255,136,0.05);"><strong>Example:</strong> ${escapeHtml(item.everyday_example)}</div>
                         <div class="hacker-only learner-only" style="margin-bottom:10px; color:#00ff88;"><strong>Technical:</strong> ${escapeHtml(item.technical)}</div>
-                        <div class="explorer-only" style="color:#ffcc00; font-size:0.9em;"><em>Example: ${escapeHtml(item.everyday_example)}</em></div>
                     </div>
                 </div>`;
             });
@@ -3248,7 +3273,7 @@ document.getElementById(<span class="str">'welcome'</span>)
             renderXssExplanation('xss-comment-expl', data.explanation, 'stored');
             document.getElementById('xss-comment').value = '';
             
-            if (data.stored_comment.contains_script && !sanitized) triggerKaveri('xss_stored_vuln', "Oh no! The comment had hidden code and the website saved it anyway. Now everyone who visits this page will run that hidden code! 😱");
+            if (data.stored_comment.contains_script && !sanitized) triggerDrishti('xss_stored_vuln', "Oh no! The comment had hidden code and the website saved it anyway. Now everyone who visits this page will run that hidden code! 😱");
             await loadXssComments();
         }
 
