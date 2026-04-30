@@ -547,6 +547,13 @@
             transition: transform 0.6s cubic-bezier(0.77, 0, 0.175, 1), opacity 0.6s ease;
         }
         .welcome-screen.hidden { transform: translateY(-100%); opacity: 0; pointer-events: none; }
+        @media (max-height: 750px), (max-width: 480px) {
+            .welcome-screen {
+                justify-content: flex-start;
+                padding-top: 30px;
+                padding-bottom: 30px;
+            }
+        }
         .welcome-header { margin-bottom: 40px; }
         .welcome-header h1 { font-size: 3em; margin: 10px 0; color: #fff; text-shadow: 0 0 15px rgba(255,255,255,0.5); }
         .welcome-header p { font-size: 1.2em; color: #ccddff; max-width: 600px; margin: 0 auto; }
@@ -569,14 +576,14 @@
         .btn-learner { background: #ffcc00; color: #000; }
         .btn-hacker { background: #ff3333; color: #fff; }
         
-        /* Kaveri Guide Character */
-        .kaveri-container { position: fixed; bottom: 20px; left: 20px; z-index: 1000; display: none; align-items: flex-end; gap: 15px; }
-        .mode-explorer .kaveri-container { display: flex; animation: slideInUp 0.4s ease forwards; }
-        .kaveri-avatar { width: 60px; height: 60px; border-radius: 50%; background: #1a1a3e; border: 2px solid #00ff88; display: flex; align-items: center; justify-content: center; font-size: 30px; box-shadow: 0 0 15px rgba(0,255,136,0.4); cursor: pointer; }
-        .kaveri-bubble { position: relative; background: #1a1a3e; border: 2px solid #00ff88; padding: 15px; border-radius: 12px; color: #fff; min-width: 260px; max-width: 320px; font-family: sans-serif; font-size: 0.95em; line-height: 1.5; box-shadow: 0 0 20px rgba(0,255,136,0.2); opacity: 0; transform: translateY(10px); transition: all 0.3s; pointer-events: none; }
-        .kaveri-bubble.visible { opacity: 1; transform: translateY(0); pointer-events: auto; }
-        .kaveri-bubble::after { content: ''; position: absolute; bottom: 15px; left: -10px; border-width: 10px 10px 10px 0; border-style: solid; border-color: transparent #00ff88 transparent transparent; }
-        .kaveri-close { position: absolute; top: 5px; right: 8px; color: #00ff88; cursor: pointer; font-size: 1.2em; border: none; background: none; padding: 2px; }
+        /* Drishti Guide Character */
+        .drishti-container { position: fixed; bottom: 20px; left: 20px; z-index: 1000; display: none; align-items: flex-end; gap: 15px; }
+        .mode-explorer .drishti-container { display: flex; animation: slideInUp 0.4s ease forwards; }
+        .drishti-avatar { width: 60px; height: 60px; border-radius: 50%; background: #1a1a3e; border: 2px solid #00ff88; display: flex; align-items: center; justify-content: center; font-size: 30px; box-shadow: 0 0 15px rgba(0,255,136,0.4); cursor: pointer; }
+        .drishti-bubble { position: relative; background: #1a1a3e; border: 2px solid #00ff88; padding: 15px; border-radius: 12px; color: #fff; min-width: 260px; max-width: 320px; font-family: sans-serif; font-size: 0.95em; line-height: 1.5; box-shadow: 0 0 20px rgba(0,255,136,0.2); opacity: 0; transform: translateY(10px); transition: all 0.3s; pointer-events: none; }
+        .drishti-bubble.visible { opacity: 1; transform: translateY(0); pointer-events: auto; }
+        .drishti-bubble::after { content: ''; position: absolute; bottom: 15px; left: -10px; border-width: 10px 10px 10px 0; border-style: solid; border-color: transparent #00ff88 transparent transparent; }
+        .drishti-close { position: absolute; top: 5px; right: 8px; color: #00ff88; cursor: pointer; font-size: 1.2em; border: none; background: none; padding: 2px; }
 
         /* Glossary System */
         .glossary-toggle { position: fixed; bottom: 20px; right: 20px; background: #00ffff; color: #000; border: none; border-radius: 30px; padding: 10px 20px; font-weight: bold; cursor: pointer; z-index: 900; box-shadow: 0 0 15px rgba(0,255,255,0.4); display: flex; align-items: center; gap: 8px; }
@@ -592,8 +599,18 @@
         .glossary-term-card { background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; margin-bottom: 15px; overflow: hidden; }
         .glossary-term-title { padding: 12px 15px; cursor: pointer; font-weight: bold; color: #fff; background: rgba(255,255,255,0.05); display: flex; justify-content: space-between; align-items: center; min-height: 44px; }
         .glossary-term-title:hover { background: rgba(255,255,255,0.1); }
-        .glossary-term-content { max-height: 0; overflow: hidden; padding: 0 15px; opacity: 0; transition: max-height 0.3s ease, padding 0.3s ease, opacity 0.3s ease; font-family: sans-serif; font-size: max(0.9em, 14px); line-height: 1.5; color: #ccddff; }
-        .glossary-term-card.expanded .glossary-term-content { max-height: 800px; padding: 15px; opacity: 1; }
+        .glossary-term-content {
+            max-height: 0;
+            overflow: hidden;
+            padding-left: 15px;
+            padding-right: 15px;
+            padding-top: 0;
+            padding-bottom: 0;
+            opacity: 0;
+            transition: max-height 0.3s ease, padding-top 0.3s ease, padding-bottom 0.3s ease, opacity 0.3s ease;
+            font-family: sans-serif; font-size: 0.9em; line-height: 1.5; color: #ccddff;
+        }
+        .glossary-term-card.expanded .glossary-term-content { max-height: 800px; padding-top: 15px; padding-bottom: 15px; opacity: 1; }
         .glossary-toggle-icon { font-size: 1.5em; line-height: 1; width: 24px; text-align: center; display: inline-block; }
         .glossary-toggle-icon::after { content: '+'; }
         .glossary-term-card.expanded .glossary-toggle-icon::after { content: '\2212'; }
@@ -1086,7 +1103,7 @@
             .mode-card-list li { font-size: 13px; line-height: 1.5; }
             .mode-btn { height: 52px; font-size: 16px; border-radius: 12px; width: 100%; }
             .glossary-panel { width: 100vw; }
-            .kaveri-avatar { width: 44px; height: 44px; font-size: 22px; }
+            .drishti-avatar { width: 44px; height: 44px; font-size: 22px; }
         }
         @media (max-width: 400px) {
             .mode-pill { font-size: 11px; padding: 8px 12px; }
@@ -1812,13 +1829,13 @@ document.getElementById(<span class="str">'welcome'</span>)
         </div>
     </div>
 
-    <!-- KAVERI GUIDE (EXPLORER ONLY) -->
-    <div class="kaveri-container" id="kaveri-guide">
-        <div class="kaveri-bubble" id="kaveri-bubble">
-            <button class="kaveri-close" onclick="closeKaveri()">×</button>
-            <div id="kaveri-text">Welcome!</div>
+    <!-- DRISHTI GUIDE (EXPLORER ONLY) -->
+    <div class="drishti-container" id="drishti-guide">
+        <div class="drishti-bubble" id="drishti-bubble">
+            <button class="drishti-close" onclick="closeDrishti()">×</button>
+            <div id="drishti-text">Welcome!</div>
         </div>
-        <div class="kaveri-avatar" onclick="replayKaveri()">🛡️</div>
+        <div class="drishti-avatar" onclick="replayDrishti()">🛡️</div>
     </div>
 
     <!-- GLOSSARY BUTTON & PANEL -->
@@ -1857,12 +1874,12 @@ document.getElementById(<span class="str">'welcome'</span>)
                 trackProgress(panelId, 'inprogress');
             }
 
-            // Kaveri Contextual Triggers
-            if (panelId === 'panel-processes') triggerKaveri('processes_tab', "Let's peek under the hood! Task Manager might lie, but the Kernel sees everything. 🕵️‍♀️");
-            if (panelId === 'panel-network') triggerKaveri('network_tab', "Every message travels in small pieces called packets. Watch them fly by! 📦");
-            if (panelId === 'panel-passwords') triggerKaveri('passwords_tab', "Hackers don't guess passwords by hand. Let's see how their tools do it so quickly. 🔑");
-            if (panelId === 'panel-sqli') triggerKaveri('sqli_tab', "Watch how confusing a website with special characters makes it spill its secrets! 🗄️");
-            if (panelId === 'panel-xss') triggerKaveri('xss_tab', "Let's learn how forged instructions hidden in a webpage can trick your browser! 📝");
+            // Drishti Contextual Triggers
+            if (panelId === 'panel-processes') triggerDrishti('processes_tab', "Let's peek under the hood! Task Manager might lie, but the Kernel sees everything. 🕵️‍♀️");
+            if (panelId === 'panel-network') triggerDrishti('network_tab', "Every message travels in small pieces called packets. Watch them fly by! 📦");
+            if (panelId === 'panel-passwords') triggerDrishti('passwords_tab', "Hackers don't guess passwords by hand. Let's see how their tools do it so quickly. 🔑");
+            if (panelId === 'panel-sqli') triggerDrishti('sqli_tab', "Watch how confusing a website with special characters makes it spill its secrets! 🗄️");
+            if (panelId === 'panel-xss') triggerDrishti('xss_tab', "Let's learn how forged instructions hidden in a webpage can trick your browser! 📝");
         }
 
         // ==================== MODE & ACCESSIBILITY SYSTEM ====================
@@ -1937,11 +1954,11 @@ document.getElementById(<span class="str">'welcome'</span>)
             // Update Home Screen structure
             renderHomeDashboard();
             
-            // Trigger Kaveri intro
+            // Trigger Drishti intro
             if (mode === 'explorer') {
-                setTimeout(() => triggerKaveri('welcome', "Welcome! I am Kaveri, your guide. I will explain everything in simple language. There is no such thing as a silly question here. Let us explore together! 👋", true), 1000);
+                setTimeout(() => triggerDrishti('welcome', "Welcome! I am Drishti, your guide. I will explain everything in simple language. There is no such thing as a silly question here. Let us explore together! 👋", true), 1000);
             } else {
-                closeKaveri();
+                closeDrishti();
             }
         }
 
@@ -2092,33 +2109,33 @@ document.getElementById(<span class="str">'welcome'</span>)
             });
         }
 
-        // ==================== KAVERI GUIDE ====================
+        // ==================== DRISHTI GUIDE ====================
 
-        let kaveriTimer = null;
-        let currentKaveriMsg = "";
+        let drishtiTimer = null;
+        let currentDrishtiMsg = "";
 
-        function triggerKaveri(key, message, force = false) {
+        function triggerDrishti(key, message, force = false) {
             if (appMode !== 'explorer') return;
             if (!force && sessionTriggers[key]) return; // Only show once per session unless forced
             sessionTriggers[key] = true;
-            currentKaveriMsg = message;
+            currentDrishtiMsg = message;
             
-            const bubble = document.getElementById('kaveri-bubble');
-            document.getElementById('kaveri-text').innerText = message;
+            const bubble = document.getElementById('drishti-bubble');
+            document.getElementById('drishti-text').innerText = message;
             bubble.classList.add('visible');
             
-            clearTimeout(kaveriTimer);
-            kaveriTimer = setTimeout(closeKaveri, 8000);
+            clearTimeout(drishtiTimer);
+            drishtiTimer = setTimeout(closeDrishti, 8000);
         }
 
-        function closeKaveri() {
-            document.getElementById('kaveri-bubble').classList.remove('visible');
-            clearTimeout(kaveriTimer);
+        function closeDrishti() {
+            document.getElementById('drishti-bubble').classList.remove('visible');
+            clearTimeout(drishtiTimer);
         }
 
-        function replayKaveri() {
-            if (!document.getElementById('kaveri-bubble').classList.contains('visible') && currentKaveriMsg) {
-                triggerKaveri('replay', currentKaveriMsg, true);
+        function replayDrishti() {
+            if (!document.getElementById('drishti-bubble').classList.contains('visible') && currentDrishtiMsg) {
+                triggerDrishti('replay', currentDrishtiMsg, true);
             }
         }
 
@@ -2268,7 +2285,7 @@ document.getElementById(<span class="str">'welcome'</span>)
                 updateSystemStatus(data.hiddenProcesses.count > 0 ? 'COMPROMISED' : 'CLEAN');
                 
                 applyModeLanguage();
-                if(data.hiddenProcesses.count > 0) triggerKaveri('cross_view_found', "Aha! Look at the red box! We caught a program hiding from Windows. You just found a Rootkit! 🕵️");
+                if(data.hiddenProcesses.count > 0) triggerDrishti('cross_view_found', "Aha! Look at the red box! We caught a program hiding from Windows. You just found a Rootkit! 🕵️");
             } catch (error) {
                 document.getElementById('analysis-content').innerHTML = `<div style="color: #ff1744;">Error: ${error.message}</div>`;
             }
@@ -2483,7 +2500,7 @@ document.getElementById(<span class="str">'welcome'</span>)
                     displayHtml += JSON.stringify(jsonObj, null, 2).replace(/\n/g, '<br>').replace(/ /g, '&nbsp;');
                     showDecodeResult(resultDiv, '#00ff88', displayHtml);
                     trackProgress('obfuscation-panel', 'explored');
-                    triggerKaveri('decoded_config', "You broke the code! Look at all those hidden settings we just uncovered. Hackers are so sneaky! 🔓");
+                    triggerDrishti('decoded_config', "You broke the code! Look at all those hidden settings we just uncovered. Hackers are so sneaky! 🔓");
                 } catch (e) {
                     // If parsing fails (meaning wrong key, resulting in garbage), show a realistic analyst warning
                     let displayHtml = `<span style="color: #ff6b35; font-weight: bold;">⚠️ Decoded Payload (Unrecognized Format - Incorrect XOR Key?):</span><br>`;
@@ -2733,7 +2750,7 @@ document.getElementById(<span class="str">'welcome'</span>)
                     term.innerHTML = `Current Attempt: [ ${target} ]<br>Attempts Made:   ${attempts.toLocaleString()}<br>Speed:           ${(batch * 20).toLocaleString()} attempts/sec<br>Status:          <span style="color:#00ff88;font-weight:bold;">✅ CRACKED! Password: ${target} in ${attempts.toLocaleString()} attempts</span>`;
                     term.style.backgroundColor = 'rgba(0,255,136,0.1)';
                     trackProgress('panel-passwords', 'explored');
-                    triggerKaveri('bf_cracked', `Boom! We cracked it in ${attempts.toLocaleString()} guesses. Imagine if a computer could do a billion guesses a second against your real password! 🚀`);
+                    triggerDrishti('bf_cracked', `Boom! We cracked it in ${attempts.toLocaleString()} guesses. Imagine if a computer could do a billion guesses a second against your real password! 🚀`);
                 } else {
                     term.innerHTML = `Current Attempt: [ ${displayAttempt} ]<br>Attempts Made:   ${attempts.toLocaleString()}<br>Speed:           ${(batch * 20).toLocaleString()} attempts/sec<br>Status:          SCANNING...`;
                 }
@@ -2791,7 +2808,7 @@ document.getElementById(<span class="str">'welcome'</span>)
                         currentRow.className = 'dict-row dict-hit';
                         currentRow.textContent = `[HIT] ✅ Found: ${word}`;
                         trackProgress('panel-passwords', 'explored');
-                        triggerKaveri('dict_cracked', "Found it! People use common words so often that criminals just try a massive list of them first. 📖");
+                        triggerDrishti('dict_cracked', "Found it! People use common words so often that criminals just try a massive list of them first. 📖");
                     } else {
                         currentRow.className = 'dict-row dict-trying';
                         currentRow.textContent = `[TRYING] ${word} ...`;
@@ -3099,7 +3116,7 @@ document.getElementById(<span class="str">'welcome'</span>)
                 if (step < 4) document.getElementById(`union-step-${step+1}`).classList.add('active');
                 else document.getElementById('union-final').style.display = 'block';
                 
-                if (step === 4) triggerKaveri('sqli_union_done', "You just stole the database's deepest secrets by confusing it with SQL! This is why websites must always lock down user input. 🛡️");
+                if (step === 4) triggerDrishti('sqli_union_done', "You just stole the database's deepest secrets by confusing it with SQL! This is why websites must always lock down user input. 🛡️");
             } catch(err) { console.error(err); }
         }
 
